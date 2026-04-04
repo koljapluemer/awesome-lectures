@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Awesome Lectures</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container py-lg">
+    <h1 class="text-2xl font-bold mb-lg">Awesome Lectures</h1>
+    <div class="flex flex-col gap-md">
+      {% for lecture in lectures %}
+      <a href="{{ lecture.slug }}/" class="card" style="display:block; color:inherit; text-decoration:none;">
+        <div class="flex items-center justify-between gap-md">
+          <div>
+            <div class="text-lg font-bold">{{ lecture.title }}</div>
+            {% if lecture.speakers %}
+            <div class="text-sm text-muted mt-sm">{{ lecture.speakers | join(", ") }}</div>
+            {% endif %}
+            {% if lecture.topics or lecture.tags %}
+            <div class="flex flex-wrap gap-sm mt-sm">
+              {% for t in (lecture.topics or []) + (lecture.tags or []) %}
+              <span class="tag">{{ t }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          {% if lecture.chillEveningAppropriate %}
+          <span title="Chill evening watch" style="font-size:1.5rem;">🌙</span>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>

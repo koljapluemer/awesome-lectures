@@ -1,0 +1,117 @@
+/* === CSS Variables & Dark/Light Mode === */
+:root {
+  --bg: #ffffff;
+  --bg-card: #f8f8f8;
+  --text: #1a1a1a;
+  --text-muted: #666666;
+  --border: #e0e0e0;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111111;
+    --bg-card: #1e1e1e;
+    --text: #f0f0f0;
+    --text-muted: #999999;
+    --border: #333333;
+    --accent: #60a5fa;
+    --accent-hover: #93c5fd;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+}
+
+/* === Reset & Base === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; line-height: 1.5; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-hover); text-decoration: underline; }
+
+/* === Typography === */
+.text-sm  { font-size: 0.875rem; }
+.text-md  { font-size: 1rem; }
+.text-lg  { font-size: 1.25rem; }
+.text-xl  { font-size: 1.5rem; }
+.text-2xl { font-size: 2rem; }
+.text-muted { color: var(--text-muted); }
+.font-bold { font-weight: 700; }
+
+/* === Spacing === */
+.m-sm  { margin: 0.5rem; }
+.m-md  { margin: 1rem; }
+.m-lg  { margin: 2rem; }
+.mt-sm { margin-top: 0.5rem; }
+.mt-md { margin-top: 1rem; }
+.mt-lg { margin-top: 2rem; }
+.mb-sm { margin-bottom: 0.5rem; }
+.mb-md { margin-bottom: 1rem; }
+.mb-lg { margin-bottom: 2rem; }
+.my-sm { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+.my-md { margin-top: 1rem;   margin-bottom: 1rem; }
+.my-lg { margin-top: 2rem;   margin-bottom: 2rem; }
+.mx-sm { margin-left: 0.5rem; margin-right: 0.5rem; }
+.mx-md { margin-left: 1rem;   margin-right: 1rem; }
+.mx-lg { margin-left: 2rem;   margin-right: 2rem; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+
+.p-sm  { padding: 0.5rem; }
+.p-md  { padding: 1rem; }
+.p-lg  { padding: 2rem; }
+.px-sm { padding-left: 0.5rem; padding-right: 0.5rem; }
+.px-md { padding-left: 1rem;   padding-right: 1rem; }
+.px-lg { padding-left: 2rem;   padding-right: 2rem; }
+.py-sm { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.py-md { padding-top: 1rem;   padding-bottom: 1rem; }
+.py-lg { padding-top: 2rem;   padding-bottom: 2rem; }
+
+/* === Layout === */
+.container { max-width: 860px; width: 100%; margin-left: auto; margin-right: auto; padding-left: 1rem; padding-right: 1rem; }
+.flex      { display: flex; }
+.flex-col  { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.items-center   { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-sm { gap: 0.5rem; }
+.gap-md { gap: 1rem; }
+.gap-lg { gap: 2rem; }
+
+/* === Card === */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: var(--shadow);
+}
+.card:hover { border-color: var(--accent); }
+
+/* === Tag / Badge === */
+.tag {
+  display: inline-block;
+  background: var(--border);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
+/* === Video Embed === */
+.video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: #000;
+}
+.video-wrapper iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: 0;
+}
+
+/* === Divider === */
+hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }

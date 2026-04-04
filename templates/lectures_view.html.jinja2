@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ lecture.title }}</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <div class="container py-lg">
+    <a href="../" class="text-sm text-muted">&larr; All lectures</a>
+    <h1 class="text-2xl font-bold mt-md mb-sm">{{ lecture.title }}</h1>
+
+    {% if lecture.speakers %}
+    <div class="text-md text-muted mb-md">{{ lecture.speakers | join(", ") }}</div>
+    {% endif %}
+
+    {% if lecture.topics or lecture.tags %}
+    <div class="flex flex-wrap gap-sm mb-md">
+      {% for t in (lecture.topics or []) + (lecture.tags or []) %}
+      <span class="tag">{{ t }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if lecture.video_id %}
+    <div class="video-wrapper mb-lg">
+      <iframe src="https://www.youtube.com/embed/{{ lecture.video_id }}"
+              allowfullscreen
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+      </iframe>
+    </div>
+    {% elif lecture.urls %}
+    <div class="mb-md">
+      {% for url in lecture.urls %}
+      <a href="{{ url }}" target="_blank" rel="noopener">{{ url }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card flex flex-col gap-sm">
+      {% if lecture.chillEveningAppropriate is not none %}
+      <div class="text-sm"><span class="text-muted">Chill evening watch:</span> {{ "Yes" if lecture.chillEveningAppropriate else "No" }}</div>
+      {% endif %}
+      {% if lecture.worthWatchingWithoutVideo is not none %}
+      <div class="text-sm"><span class="text-muted">Worth watching without video:</span> {{ lecture.worthWatchingWithoutVideo }}/10</div>
+      {% endif %}
+      {% if lecture.beginnerExpertSpectrum %}
+      <div class="text-sm"><span class="text-muted">Beginner–expert level:</span> {{ lecture.beginnerExpertSpectrum[0] }}/10</div>
+      {% endif %}
+      {% if lecture.liked %}
+      <div class="text-sm"><span class="text-muted">Liked:</span> {{ lecture.liked[0] }}/100</div>
+      {% endif %}
+    </div>
+
+    {% if lecture.learnings %}
+    <h2 class="text-lg font-bold mt-lg mb-sm">Learnings</h2>
+    <ul class="flex flex-col gap-sm" style="padding-left:1.25rem; list-style:disc;">
+      {% for item in lecture.learnings %}
+      {% for key, val in item.items() %}
+      <li class="text-sm"><span class="font-bold">{{ key }}</span>: {{ val }}/10</li>
+      {% endfor %}
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</body>
+</html>
