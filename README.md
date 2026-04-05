@@ -4,3 +4,4 @@
 - <https://www.openculture.com/freeonlinecourses>
 - <https://library.wabash.edu/av/open>
 - <https://www.youtube.com/watch?v=F-OxHWWg59o&list=PLoROMvodv4rMyupDF2O00r19JsmolyXdD>
+- <https://video.tu-clausthal.de/uebersicht/lehre/vorlesungsaufzeichnungen.html>

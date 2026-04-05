@@ -125,6 +125,7 @@ def build():
     PUBLIC_DIR.mkdir()
 
     shutil.copy(TEMPLATES_DIR / "styles.css", PUBLIC_DIR / "styles.css")
+    shutil.copy(ROOT / "misc" / "favicon.ico", PUBLIC_DIR / "favicon.ico")
 
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)), autoescape=True)
     lectures = load_lectures()
