@@ -1,0 +1,11 @@
+{
+    "title": "Reinforcement learning: Fast and slow",
+    "speakers": [
+        "Matthew Botvinick"
+    ],
+    "urls": [
+        "https://www.youtube.com/watch?v=b0LddBiF5jM"
+    ],
+    "extra": "Matthew Botvinick’s work straddles the boundaries between cognitive psychology, computational and experimental neuroscience and artificial intelligence. In this talk Dr. Botvinick will review recent developments in deep reinforcement learning (RL), showing how deep RL can proceed rapidly, and also have interesting potential implications for our understanding of human learning and neural function.",
+    "embed": true
+}
