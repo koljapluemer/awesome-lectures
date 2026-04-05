@@ -114,17 +114,16 @@ def build():
     # Thumbnails
     thumbs_dir = PUBLIC_DIR / "thumbnails"
     thumbs_dir.mkdir()
+    placeholder = ROOT / "misc" / "placeholder.webp"
+    shutil.copy(placeholder, thumbs_dir / "placeholder.webp")
     for lecture in lectures:
         vid = lecture["video_id"]
-        if vid:
-            cached = fetch_thumbnail(vid)
-            if cached:
-                shutil.copy(cached, thumbs_dir / cached.name)
-                lecture["thumbnail"] = f"thumbnails/{cached.name}"
-            else:
-                lecture["thumbnail"] = None
+        cached = fetch_thumbnail(vid) if vid else None
+        if cached:
+            shutil.copy(cached, thumbs_dir / cached.name)
+            lecture["thumbnail"] = f"thumbnails/{cached.name}"
         else:
-            lecture["thumbnail"] = None
+            lecture["thumbnail"] = "thumbnails/placeholder.webp"
 
     # Three orderings
     random_order = random.sample(lectures, len(lectures))

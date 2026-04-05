@@ -41,9 +41,7 @@
   <div class="flex flex-col gap-md">
     {% for lecture in lectures %}
     <a href="{{ root }}lectures/{{ lecture.slug }}.html" class="card lecture-card">
-      {% if lecture.thumbnail %}
       <img src="{{ root }}{{ lecture.thumbnail }}" alt="" width="120" style="border-radius:0.375rem; flex-shrink:0; object-fit:cover;">
-      {% endif %}
       <div>
         <div class="text-lg font-bold">{{ lecture.title }}</div>
         {% if lecture.speakers %}
