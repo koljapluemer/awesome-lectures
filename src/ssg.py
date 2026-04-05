@@ -126,6 +126,7 @@ def build():
 
     shutil.copy(TEMPLATES_DIR / "styles.css", PUBLIC_DIR / "styles.css")
     shutil.copy(ROOT / "misc" / "favicon.ico", PUBLIC_DIR / "favicon.ico")
+    shutil.copy(ROOT / "misc" / "logo.png", PUBLIC_DIR / "logo.png")
 
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)), autoescape=True)
     lectures = load_lectures()
@@ -163,6 +164,12 @@ def build():
     search_dir.mkdir()
     tpl = env.get_template("search.html.jinja2")
     (search_dir / "index.html").write_text(tpl.render(root="../"))
+
+    # About page
+    about_dir = PUBLIC_DIR / "about"
+    about_dir.mkdir()
+    tpl = env.get_template("about.html.jinja2")
+    (about_dir / "index.html").write_text(tpl.render(root="../"))
 
     # Submit page + thanks
     submit_dir = PUBLIC_DIR / "submit"
