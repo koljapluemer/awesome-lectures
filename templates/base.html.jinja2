@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>What&#39;s Up with AI? — Awesome Lectures</title>
-  <link rel="stylesheet" href="../styles.css">
+  <title>{% block title %}Awesome Lectures{% endblock %}</title>
+  <link rel="stylesheet" href="{{ root }}styles.css">
   <style>
     header {
       border-bottom: 1px solid var(--border);
@@ -42,15 +42,15 @@
       border-radius: 0.25rem;
     }
   </style>
-  
+  {% block head %}{% endblock %}
 </head>
 <body>
   <header>
     <div class="inner">
-      <a href="../" class="font-bold text-md">Awesome Lectures</a>
+      <a href="{{ root }}" class="font-bold text-md">Awesome Lectures</a>
       <nav class="header-nav">
-        <a href="../lectures/" class="text-sm">Browse</a>
-        <a href="../search/" class="search-trigger" id="search-btn">
+        <a href="{{ root }}lectures/" class="text-sm">Browse</a>
+        <a href="{{ root }}search/" class="search-trigger" id="search-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           Search
           <span class="search-kbd">⌘K</span>
@@ -60,43 +60,14 @@
   </header>
 
   <main>
-    
-<div class="container py-lg">
-  <h1 class="text-2xl font-bold mt-md mb-sm">What&#39;s Up with AI?</h1>
-
-  
-  <div class="text-md text-muted mb-md">Terry Winograd</div>
-  
-
-  
-
-  
-  <div class="video-wrapper mb-lg">
-    <iframe src="https://www.youtube.com/embed/F-OxHWWg59o"
-            allowfullscreen
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
-    </iframe>
-  </div>
-  
-
-  <div class="card flex flex-col gap-sm">
-    
-    <div class="text-sm"><span class="text-muted">Worth watching without video:</span> /10</div>
-    
-    
-    
-  </div>
-
-  
-</div>
-
+    {% block content %}{% endblock %}
   </main>
 
   <script>
     document.addEventListener('keydown', e => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        window.location.href = '../search/';
+        window.location.href = '{{ root }}search/';
       }
     });
   </script>

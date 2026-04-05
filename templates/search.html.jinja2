@@ -1,0 +1,25 @@
+{% extends "base.html.jinja2" %}
+
+{% block title %}Search — Awesome Lectures{% endblock %}
+
+{% block head %}
+<link href="{{ root }}pagefind/pagefind-ui.css" rel="stylesheet">
+<style>
+  .pagefind-ui {
+    --pagefind-ui-primary: var(--accent);
+    --pagefind-ui-text: var(--text);
+    --pagefind-ui-background: var(--bg-card);
+    --pagefind-ui-border: var(--border);
+    --pagefind-ui-tag: var(--border);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-lg">
+  <h1 class="text-2xl font-bold mb-lg">Search</h1>
+  <div id="search"></div>
+</div>
+<script src="{{ root }}pagefind/pagefind-ui.js"></script>
+<script>new PagefindUI({ element: '#search', showImages: false });</script>
+{% endblock %}

@@ -1,16 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Awesome Lectures</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div class="container" style="min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-    <h1 class="text-2xl font-bold mb-sm">Awesome Lectures</h1>
-    <p class="text-md text-muted mb-lg">A curated collection of talks worth watching.</p>
-    <a href="lectures/" class="text-lg">Browse lectures &rarr;</a>
-  </div>
-</body>
-</html>
+{% extends "base.html.jinja2" %}
+
+{% block content %}
+<div class="container" style="min-height:80vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+  <h1 class="text-2xl font-bold mb-sm">Awesome Lectures</h1>
+  <p class="text-md text-muted mb-lg">A curated collection of talks worth watching.</p>
+  <a href="{{ root }}lectures/" class="text-lg">Browse lectures &rarr;</a>
+</div>
+{% endblock %}

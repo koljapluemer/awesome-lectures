@@ -5,6 +5,7 @@ import io
 import json
 import re
 import shutil
+import subprocess
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -103,23 +104,33 @@ def build():
 
     # Landing page
     tpl = env.get_template("index.html.jinja2")
-    (PUBLIC_DIR / "index.html").write_text(tpl.render())
+    (PUBLIC_DIR / "index.html").write_text(tpl.render(root=""))
 
-    # Lectures list (now a static shell; data comes from lectures.json)
+    # Search page
+    search_dir = PUBLIC_DIR / "search"
+    search_dir.mkdir()
+    tpl = env.get_template("search.html.jinja2")
+    (search_dir / "index.html").write_text(tpl.render(root="../"))
+
+    # Lectures list (static shell; data comes from lectures.json)
     lectures_dir = PUBLIC_DIR / "lectures"
     lectures_dir.mkdir()
     tpl = env.get_template("lectures_list.html.jinja2")
-    (lectures_dir / "index.html").write_text(tpl.render())
+    (lectures_dir / "index.html").write_text(tpl.render(root="../"))
 
-    # Per-lecture pages (still fully rendered for pagefind indexing)
+    # Per-lecture pages (fully rendered for pagefind indexing)
     tpl = env.get_template("lectures_view.html.jinja2")
     for lecture in lectures:
-        # Fix thumbnail path to be relative from lectures/
-        if lecture.get("thumbnail"):
-            lecture["thumbnail"] = f"../{lecture['thumbnail']}"
-        (lectures_dir / f"{lecture['slug']}.html").write_text(tpl.render(lecture=lecture))
+        (lectures_dir / f"{lecture['slug']}.html").write_text(tpl.render(lecture=lecture, root="../"))
 
     print(f"Built {len(lectures)} lectures -> {PUBLIC_DIR}")
+
+    # Build pagefind search index
+    result = subprocess.run(["npx", "pagefind", "--site", str(PUBLIC_DIR)], capture_output=True, text=True)
+    if result.returncode == 0:
+        print("Pagefind index built.")
+    else:
+        print(f"Pagefind failed (is npx available?):\n{result.stderr}")
 
 
 if __name__ == "__main__":
