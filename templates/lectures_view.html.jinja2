@@ -39,9 +39,6 @@
     {% endif %}
 
     <div class="card flex flex-col gap-sm">
-      {% if lecture.chillEveningAppropriate is not none %}
-      <div class="text-sm"><span class="text-muted">Chill evening watch:</span> {{ "Yes" if lecture.chillEveningAppropriate else "No" }}</div>
-      {% endif %}
       {% if lecture.worthWatchingWithoutVideo is not none %}
       <div class="text-sm"><span class="text-muted">Worth watching without video:</span> {{ lecture.worthWatchingWithoutVideo }}/10</div>
       {% endif %}

@@ -1,26 +1,13 @@
-/* === CSS Variables & Dark/Light Mode === */
+/* === CSS Variables === */
 :root {
-  --bg: #ffffff;
-  --bg-card: #f8f8f8;
-  --text: #1a1a1a;
-  --text-muted: #666666;
-  --border: #e0e0e0;
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
-  --shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #111111;
-    --bg-card: #1e1e1e;
-    --text: #f0f0f0;
-    --text-muted: #999999;
-    --border: #333333;
-    --accent: #60a5fa;
-    --accent-hover: #93c5fd;
-    --shadow: 0 1px 3px rgba(0,0,0,0.4);
-  }
+  --bg: #fdf6f0;
+  --bg-card: #fff9f5;
+  --text: #2d2520;
+  --text-muted: #8a7a72;
+  --border: #e8d8cf;
+  --accent: #b07060;
+  --accent-hover: #8a5040;
+  --shadow: 0 1px 4px rgba(80,40,20,0.07);
 }
 
 /* === Reset & Base === */

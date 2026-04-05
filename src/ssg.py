@@ -1,22 +1,47 @@
 #!/usr/bin/env python3
 """Static site generator: data/ + templates/ -> public/"""
 
+import io
 import json
 import re
 import shutil
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
+from PIL import Image
 
 ROOT = Path(__file__).parent.parent
 DATA_DIR = ROOT / "data"
 TEMPLATES_DIR = ROOT / "templates"
 PUBLIC_DIR = ROOT / "public"
+THUMB_CACHE = ROOT / ".thumbnails"
 
 
 def youtube_video_id(url: str) -> str | None:
     m = re.search(r"(?:v=|youtu\.be/)([A-Za-z0-9_-]{11})", url)
     return m.group(1) if m else None
+
+
+def fetch_thumbnail(video_id: str) -> Path | None:
+    THUMB_CACHE.mkdir(exist_ok=True)
+    dest = THUMB_CACHE / f"{video_id}.webp"
+    if dest.exists():
+        return dest
+    for quality in ("maxresdefault", "hqdefault"):
+        url = f"https://img.youtube.com/vi/{video_id}/{quality}.jpg"
+        try:
+            data = urllib.request.urlopen(url).read()
+            img = Image.open(io.BytesIO(data))
+            w, h = img.size
+            img = img.resize((400, int(h * 400 / w)), Image.LANCZOS)
+            img.save(dest, "webp", quality=75)
+            print(f"  thumbnail: {video_id}")
+            return dest
+        except urllib.error.HTTPError:
+            continue
+    return None
 
 
 def load_lectures() -> list[dict]:
@@ -35,11 +60,25 @@ def build():
         shutil.rmtree(PUBLIC_DIR)
     PUBLIC_DIR.mkdir()
 
-    # Copy stylesheet
     shutil.copy(TEMPLATES_DIR / "styles.css", PUBLIC_DIR / "styles.css")
 
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)), autoescape=True)
     lectures = load_lectures()
+
+    # Fetch thumbnails and copy to public/
+    thumbs_dir = PUBLIC_DIR / "thumbnails"
+    thumbs_dir.mkdir()
+    for lecture in lectures:
+        vid = lecture["video_id"]
+        if vid:
+            cached = fetch_thumbnail(vid)
+            if cached:
+                shutil.copy(cached, thumbs_dir / cached.name)
+                lecture["thumbnail"] = f"../thumbnails/{cached.name}"
+            else:
+                lecture["thumbnail"] = None
+        else:
+            lecture["thumbnail"] = None
 
     # Landing page
     tpl = env.get_template("index.html.jinja2")
@@ -47,7 +86,7 @@ def build():
 
     # Lectures list
     lectures_dir = PUBLIC_DIR / "lectures"
-    lectures_dir.mkdir(exist_ok=True)
+    lectures_dir.mkdir()
     tpl = env.get_template("lectures_list.html.jinja2")
     (lectures_dir / "index.html").write_text(tpl.render(lectures=lectures))
 
