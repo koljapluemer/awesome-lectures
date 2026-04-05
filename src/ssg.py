@@ -55,6 +55,23 @@ def load_lectures() -> list[dict]:
     return lectures
 
 
+def lecture_index_entry(lecture: dict) -> dict:
+    """Minimal record for lectures.json — only what the filter UI needs."""
+    learning_keys = [
+        key
+        for item in lecture.get("learnings") or []
+        for key in item.keys()
+    ]
+    return {
+        "slug": lecture["slug"],
+        "title": lecture["title"],
+        "speakers": lecture.get("speakers") or [],
+        "topics": (lecture.get("topics") or []) + (lecture.get("tags") or []),
+        "learnings": learning_keys,
+        "thumbnail": lecture.get("thumbnail"),
+    }
+
+
 def build():
     if PUBLIC_DIR.exists():
         shutil.rmtree(PUBLIC_DIR)
@@ -65,7 +82,7 @@ def build():
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)), autoescape=True)
     lectures = load_lectures()
 
-    # Fetch thumbnails and copy to public/
+    # Fetch thumbnails and copy to public/; store root-relative path
     thumbs_dir = PUBLIC_DIR / "thumbnails"
     thumbs_dir.mkdir()
     for lecture in lectures:
@@ -74,25 +91,32 @@ def build():
             cached = fetch_thumbnail(vid)
             if cached:
                 shutil.copy(cached, thumbs_dir / cached.name)
-                lecture["thumbnail"] = f"../thumbnails/{cached.name}"
+                lecture["thumbnail"] = f"thumbnails/{cached.name}"
             else:
                 lecture["thumbnail"] = None
         else:
             lecture["thumbnail"] = None
 
+    # lectures.json — consumed by the filter UI
+    index = [lecture_index_entry(l) for l in lectures]
+    (PUBLIC_DIR / "lectures.json").write_text(json.dumps(index, ensure_ascii=False))
+
     # Landing page
     tpl = env.get_template("index.html.jinja2")
     (PUBLIC_DIR / "index.html").write_text(tpl.render())
 
-    # Lectures list
+    # Lectures list (now a static shell; data comes from lectures.json)
     lectures_dir = PUBLIC_DIR / "lectures"
     lectures_dir.mkdir()
     tpl = env.get_template("lectures_list.html.jinja2")
-    (lectures_dir / "index.html").write_text(tpl.render(lectures=lectures))
+    (lectures_dir / "index.html").write_text(tpl.render())
 
-    # Per-lecture pages
+    # Per-lecture pages (still fully rendered for pagefind indexing)
     tpl = env.get_template("lectures_view.html.jinja2")
     for lecture in lectures:
+        # Fix thumbnail path to be relative from lectures/
+        if lecture.get("thumbnail"):
+            lecture["thumbnail"] = f"../{lecture['thumbnail']}"
         (lectures_dir / f"{lecture['slug']}.html").write_text(tpl.render(lecture=lecture))
 
     print(f"Built {len(lectures)} lectures -> {PUBLIC_DIR}")
