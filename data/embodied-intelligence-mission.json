@@ -1,8 +1,12 @@
 {
     "title": "The Next Horizon: Embodied Intelligence Mission",
-    "speakers": ["Prof. Leslie Kaelbling", "Prof. Nancy Kanwisher"],
+    "speakers": [
+        "Prof. Leslie Kaelbling",
+        "Prof. Nancy Kanwisher"
+    ],
     "chillEveningAppropriate": true,
     "urls": [
         "https://www.youtube.com/watch?v=TnGqodJc_Z4"
-    ]
+    ],
+    "embed": true
 }

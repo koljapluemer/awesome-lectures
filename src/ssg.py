@@ -58,13 +58,30 @@ def fetch_thumbnail(video_id: str) -> Path | None:
     return None
 
 
+def check_oembed(video_id: str) -> bool:
+    url = f"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={video_id}&format=json"
+    try:
+        urllib.request.urlopen(url)
+        return True
+    except urllib.error.HTTPError:
+        return False
+
+
 def load_lectures() -> list[dict]:
     lectures = []
     for path in sorted(DATA_DIR.glob("*.json")):
         data = json.loads(path.read_text())
-        data["slug"] = path.stem
         urls = data.get("urls", [])
-        data["video_id"] = youtube_video_id(urls[0]) if urls else None
+        video_id = youtube_video_id(urls[0]) if urls else None
+
+        # Check embeddability once; write result back to JSON as cache
+        if video_id and "embed" not in data:
+            data["embed"] = check_oembed(video_id)
+            print(f"  embed check {path.stem}: {data['embed']}")
+            path.write_text(json.dumps(data, indent=4, ensure_ascii=False) + "\n")
+
+        data["slug"] = path.stem
+        data["video_id"] = video_id
         data["date_added"] = git_date_added(path)
         lectures.append(data)
     return lectures

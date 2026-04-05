@@ -18,15 +18,20 @@
   </div>
   {% endif %}
 
-  {% if lecture.video_id %}
+  {% if lecture.video_id and lecture.embed %}
   <div class="video-wrapper mb-lg">
     <iframe src="https://www.youtube.com/embed/{{ lecture.video_id }}"
             allowfullscreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
     </iframe>
   </div>
-  {% elif lecture.urls %}
-  <div class="mb-md">
+  {% elif lecture.thumbnail and lecture.urls %}
+  <a href="{{ lecture.urls[0] }}" target="_blank" rel="noopener" class="mb-lg" style="display:inline-block;">
+    <img src="{{ root }}{{ lecture.thumbnail }}" alt="{{ lecture.title }}" style="border-radius:0.5rem; max-width:400px; width:100%; display:block;">
+  </a>
+  {% endif %}
+  {% if lecture.urls %}
+  <div class="mb-md flex flex-col gap-sm">
     {% for url in lecture.urls %}
     <a href="{{ url }}" target="_blank" rel="noopener">{{ url }}</a>
     {% endfor %}

@@ -21,26 +21,6 @@
     header a { color: var(--text); text-decoration: none; }
     header a:hover { color: var(--accent); text-decoration: none; }
     .header-nav { display: flex; gap: 1.5rem; align-items: center; }
-    .search-trigger {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      color: var(--text-muted);
-      font-size: 0.875rem;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      padding: 0.25rem 0.6rem;
-      border-radius: 0.375rem;
-    }
-    .search-trigger:hover { border-color: var(--accent); color: var(--accent); }
-    .search-kbd {
-      font-size: 0.7rem;
-      background: var(--border);
-      color: var(--text-muted);
-      padding: 0.1rem 0.3rem;
-      border-radius: 0.25rem;
-    }
   </style>
   
 <style>
@@ -73,11 +53,7 @@
       <a href="../../" class="font-bold text-md">Awesome Lectures</a>
       <nav class="header-nav">
         <a href="../../lectures/random/" class="text-sm">Browse</a>
-        <a href="../../search/" class="search-trigger" id="search-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          Search
-          <span class="search-kbd">⌘K</span>
-        </a>
+        <a href="../../search/" class="text-sm">Search</a>
       </nav>
     </div>
   </header>
@@ -96,18 +72,6 @@
 
   <div class="flex flex-col gap-md">
     
-    <a href="../../lectures/from-haptic-illusions-to-beyond-real-interactions-in-vr.html" class="card lecture-card">
-      <img src="../../thumbnails/placeholder.webp" alt="" width="120" style="border-radius:0.375rem; flex-shrink:0; object-fit:cover;">
-      <div>
-        <div class="text-lg font-bold">From Haptic Illusions to Beyond Real Interactions in Virtual Reality</div>
-        
-        <div class="text-sm text-muted mt-sm">Parastoo Abtahi</div>
-        
-        
-        
-      </div>
-    </a>
-    
     <a href="../../lectures/magic-the-gathering-20-years-20-lessons-learned.html" class="card lecture-card">
       <img src="../../thumbnails/QHHg99hwQGY.webp" alt="" width="120" style="border-radius:0.375rem; flex-shrink:0; object-fit:cover;">
       <div>
@@ -118,6 +82,42 @@
         <div class="flex flex-wrap gap-sm mt-sm">
           <span class="tag">game-design</span><span class="tag">conference</span>
         </div>
+        
+      </div>
+    </a>
+    
+    <a href="../../lectures/whats-up-with-ai.html" class="card lecture-card">
+      <img src="../../thumbnails/F-OxHWWg59o.webp" alt="" width="120" style="border-radius:0.375rem; flex-shrink:0; object-fit:cover;">
+      <div>
+        <div class="text-lg font-bold">What&#39;s Up with AI?</div>
+        
+        <div class="text-sm text-muted mt-sm">Terry Winograd</div>
+        
+        
+        
+      </div>
+    </a>
+    
+    <a href="../../lectures/practice-of-art-8-1.html" class="card lecture-card">
+      <img src="../../thumbnails/placeholder.webp" alt="" width="120" style="border-radius:0.375rem; flex-shrink:0; object-fit:cover;">
+      <div>
+        <div class="text-lg font-bold">Practice of Art: Introduction</div>
+        
+        <div class="text-sm text-muted mt-sm">John S. McNamara</div>
+        
+        
+        
+      </div>
+    </a>
+    
+    <a href="../../lectures/from-haptic-illusions-to-beyond-real-interactions-in-vr.html" class="card lecture-card">
+      <img src="../../thumbnails/3zgFXJX8GIw.webp" alt="" width="120" style="border-radius:0.375rem; flex-shrink:0; object-fit:cover;">
+      <div>
+        <div class="text-lg font-bold">From Haptic Illusions to Beyond Real Interactions in Virtual Reality</div>
+        
+        <div class="text-sm text-muted mt-sm">Parastoo Abtahi</div>
+        
+        
         
       </div>
     </a>
@@ -134,12 +134,10 @@
       </div>
     </a>
     
-    <a href="../../lectures/practice-of-art-8-.html" class="card lecture-card">
+    <a href="../../lectures/hardware-software-codesign-1.html" class="card lecture-card">
       <img src="../../thumbnails/placeholder.webp" alt="" width="120" style="border-radius:0.375rem; flex-shrink:0; object-fit:cover;">
       <div>
-        <div class="text-lg font-bold">Practice of Art</div>
-        
-        <div class="text-sm text-muted mt-sm">John S. McNamara</div>
+        <div class="text-lg font-bold">Structural Concept of Hardware/Software Co-Design</div>
         
         
         
@@ -158,18 +156,6 @@
       </div>
     </a>
     
-    <a href="../../lectures/whats-up-with-ai.html" class="card lecture-card">
-      <img src="../../thumbnails/F-OxHWWg59o.webp" alt="" width="120" style="border-radius:0.375rem; flex-shrink:0; object-fit:cover;">
-      <div>
-        <div class="text-lg font-bold">What&#39;s Up with AI?</div>
-        
-        <div class="text-sm text-muted mt-sm">Terry Winograd</div>
-        
-        
-        
-      </div>
-    </a>
-    
   </div>
 
   
@@ -177,13 +163,5 @@
 
   </main>
 
-  <script>
-    document.addEventListener('keydown', e => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        window.location.href = '../../search/';
-      }
-    });
-  </script>
 </body>
 </html>
