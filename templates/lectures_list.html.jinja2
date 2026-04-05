@@ -2,111 +2,70 @@
 
 {% block title %}Browse — Awesome Lectures{% endblock %}
 
-{% block content %}
-<div class="container py-lg">
-  <h1 class="text-2xl font-bold mb-lg">Browse</h1>
-
-  <div id="filters" class="flex flex-col gap-md mb-lg"></div>
-
-  <div id="results" class="flex flex-col gap-md"></div>
-  <p id="no-results" class="text-md mt-lg" style="display:none; color:var(--text-muted);">No lectures match the selected filters.</p>
-</div>
-
+{% block head %}
 <style>
-  .filter-btn {
-    cursor: pointer;
+  .mode-nav { display: flex; gap: 0.5rem; }
+  .mode-btn {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
     border: 1px solid var(--border);
     background: var(--bg-card);
     color: var(--text-muted);
-    font-size: 0.75rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
+    text-decoration: none;
   }
-  .filter-btn.active {
+  .mode-btn.active {
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
   }
-  #results .card { display: flex; gap: 1rem; align-items: center; color: inherit; text-decoration: none; }
-  #results .card:hover { border-color: var(--accent); }
+  .lecture-card { display: flex; gap: 1rem; align-items: center; color: inherit; text-decoration: none; }
+  .lecture-card:hover { border-color: var(--accent); }
+  .pagination { display: flex; align-items: center; justify-content: space-between; margin-top: 2rem; }
+  .pagination a { font-size: 0.875rem; }
+  .pagination .page-info { font-size: 0.875rem; color: var(--text-muted); }
 </style>
+{% endblock %}
 
-<script>
-  const BASE = '{{ root }}';
-  let lectures = [];
-  let activeTopics = new Set();
-  let activeLearnings = new Set();
+{% block content %}
+<div class="container py-lg">
+  <div class="flex items-center justify-between mb-lg">
+    <h1 class="text-2xl font-bold">Browse</h1>
+    <nav class="mode-nav">
+      <a href="{{ root }}{{ mode_urls.random }}" class="mode-btn{% if mode == 'random' %} active{% endif %}">Random</a>
+      <a href="{{ root }}{{ mode_urls.alpha }}"  class="mode-btn{% if mode == 'alpha'  %} active{% endif %}">A–Z</a>
+      <a href="{{ root }}{{ mode_urls.recent }}" class="mode-btn{% if mode == 'recent' %} active{% endif %}">Recent</a>
+    </nav>
+  </div>
 
-  async function init() {
-    lectures = await fetch(`${BASE}lectures.json`).then(r => r.json());
-    buildFilters();
-    render();
-  }
+  <div class="flex flex-col gap-md">
+    {% for lecture in lectures %}
+    <a href="{{ root }}lectures/{{ lecture.slug }}.html" class="card lecture-card">
+      {% if lecture.thumbnail %}
+      <img src="{{ root }}{{ lecture.thumbnail }}" alt="" width="120" style="border-radius:0.375rem; flex-shrink:0; object-fit:cover;">
+      {% endif %}
+      <div>
+        <div class="text-lg font-bold">{{ lecture.title }}</div>
+        {% if lecture.speakers %}
+        <div class="text-sm text-muted mt-sm">{{ lecture.speakers | join(", ") }}</div>
+        {% endif %}
+        {% set all_tags = (lecture.topics or []) + (lecture.tags or []) %}
+        {% if all_tags %}
+        <div class="flex flex-wrap gap-sm mt-sm">
+          {% for t in all_tags %}<span class="tag">{{ t }}</span>{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
 
-  function allTopics() {
-    const s = new Set();
-    lectures.forEach(l => l.topics.forEach(t => s.add(t)));
-    return [...s].sort();
-  }
-
-  function allLearnings() {
-    const s = new Set();
-    lectures.forEach(l => l.learnings.forEach(t => s.add(t)));
-    return [...s].sort();
-  }
-
-  function buildFilters() {
-    const topics = allTopics();
-    const learnings = allLearnings();
-    const container = document.getElementById('filters');
-    if (topics.length) container.appendChild(filterGroup('Topics', topics, activeTopics, render));
-    if (learnings.length) container.appendChild(filterGroup('Learnings', learnings, activeLearnings, render));
-  }
-
-  function filterGroup(label, items, activeSet, onChange) {
-    const wrap = document.createElement('div');
-    wrap.className = 'flex flex-wrap gap-sm items-center';
-    const lbl = document.createElement('span');
-    lbl.className = 'text-sm text-muted';
-    lbl.textContent = label + ':';
-    wrap.appendChild(lbl);
-    items.forEach(item => {
-      const btn = document.createElement('button');
-      btn.className = 'filter-btn';
-      btn.textContent = item;
-      btn.onclick = () => {
-        activeSet.has(item) ? activeSet.delete(item) : activeSet.add(item);
-        btn.classList.toggle('active', activeSet.has(item));
-        onChange();
-      };
-      wrap.appendChild(btn);
-    });
-    return wrap;
-  }
-
-  function matches(lecture) {
-    if (activeTopics.size && ![...activeTopics].every(t => lecture.topics.includes(t))) return false;
-    if (activeLearnings.size && ![...activeLearnings].every(t => lecture.learnings.includes(t))) return false;
-    return true;
-  }
-
-  function render() {
-    const visible = lectures.filter(matches);
-    const container = document.getElementById('results');
-    container.innerHTML = visible.map(cardHTML).join('');
-    document.getElementById('no-results').style.display = visible.length ? 'none' : 'block';
-  }
-
-  function cardHTML(l) {
-    const thumb = l.thumbnail
-      ? `<img src="${BASE}${l.thumbnail}" alt="" width="120" style="border-radius:0.375rem;flex-shrink:0;object-fit:cover;">` : '';
-    const speakers = l.speakers.length
-      ? `<div class="text-sm text-muted mt-sm">${l.speakers.join(', ')}</div>` : '';
-    const tags = [...l.topics, ...l.learnings].length
-      ? `<div class="flex flex-wrap gap-sm mt-sm">${[...l.topics, ...l.learnings].map(t => `<span class="tag">${t}</span>`).join('')}</div>` : '';
-    return `<a href="${BASE}lectures/${l.slug}.html" class="card">${thumb}<div><div class="text-lg font-bold">${l.title}</div>${speakers}${tags}</div></a>`;
-  }
-
-  init();
-</script>
+  {% if total_pages > 1 %}
+  <div class="pagination">
+    {% if prev_url %}<a href="{{ root }}{{ prev_url }}">&larr; Previous</a>{% else %}<span></span>{% endif %}
+    <span class="page-info">{{ page }} / {{ total_pages }}</span>
+    {% if next_url %}<a href="{{ root }}{{ next_url }}">Next &rarr;</a>{% else %}<span></span>{% endif %}
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

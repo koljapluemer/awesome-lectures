@@ -2,7 +2,9 @@
 """Static site generator: data/ + templates/ -> public/"""
 
 import io
+import math
 import json
+import random
 import re
 import shutil
 import subprocess
@@ -18,11 +20,22 @@ DATA_DIR = ROOT / "data"
 TEMPLATES_DIR = ROOT / "templates"
 PUBLIC_DIR = ROOT / "public"
 THUMB_CACHE = ROOT / ".thumbnails"
+PAGE_SIZE = 20
 
 
 def youtube_video_id(url: str) -> str | None:
     m = re.search(r"(?:v=|youtu\.be/)([A-Za-z0-9_-]{11})", url)
     return m.group(1) if m else None
+
+
+def git_date_added(path: Path) -> str:
+    """ISO date of first git commit for this file, empty string if untracked."""
+    result = subprocess.run(
+        ["git", "log", "--follow", "--format=%aI", "--", str(path.relative_to(ROOT))],
+        capture_output=True, text=True, cwd=ROOT,
+    )
+    lines = result.stdout.strip().splitlines()
+    return lines[-1] if lines else ""
 
 
 def fetch_thumbnail(video_id: str) -> Path | None:
@@ -52,25 +65,40 @@ def load_lectures() -> list[dict]:
         data["slug"] = path.stem
         urls = data.get("urls", [])
         data["video_id"] = youtube_video_id(urls[0]) if urls else None
+        data["date_added"] = git_date_added(path)
         lectures.append(data)
     return lectures
 
 
-def lecture_index_entry(lecture: dict) -> dict:
-    """Minimal record for lectures.json — only what the filter UI needs."""
-    learning_keys = [
-        key
-        for item in lecture.get("learnings") or []
-        for key in item.keys()
-    ]
-    return {
-        "slug": lecture["slug"],
-        "title": lecture["title"],
-        "speakers": lecture.get("speakers") or [],
-        "topics": (lecture.get("topics") or []) + (lecture.get("tags") or []),
-        "learnings": learning_keys,
-        "thumbnail": lecture.get("thumbnail"),
-    }
+def page_url(mode: str, page: int) -> str:
+    """Root-relative URL for a given mode + page number."""
+    if page == 1:
+        return f"lectures/{mode}/"
+    return f"lectures/{mode}/{page}.html"
+
+
+def build_paginated(tpl, lectures: list[dict], mode: str, mode_dir: Path, root: str):
+    total_pages = max(1, math.ceil(len(lectures) / PAGE_SIZE))
+    mode_dir.mkdir()
+    for page in range(1, total_pages + 1):
+        slice_ = lectures[(page - 1) * PAGE_SIZE : page * PAGE_SIZE]
+        ctx = {
+            "root": root,
+            "lectures": slice_,
+            "page": page,
+            "total_pages": total_pages,
+            "mode": mode,
+            "prev_url": None if page == 1 else page_url(mode, page - 1),
+            "next_url": None if page == total_pages else page_url(mode, page + 1),
+            "mode_urls": {
+                "random": "lectures/random/",
+                "alpha":  "lectures/alpha/",
+                "recent": "lectures/recent/",
+            },
+        }
+        filename = "index.html" if page == 1 else f"{page}.html"
+        (mode_dir / filename).write_text(tpl.render(**ctx))
+    return total_pages
 
 
 def build():
@@ -83,7 +111,7 @@ def build():
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)), autoescape=True)
     lectures = load_lectures()
 
-    # Fetch thumbnails and copy to public/; store root-relative path
+    # Thumbnails
     thumbs_dir = PUBLIC_DIR / "thumbnails"
     thumbs_dir.mkdir()
     for lecture in lectures:
@@ -98,9 +126,10 @@ def build():
         else:
             lecture["thumbnail"] = None
 
-    # lectures.json — consumed by the filter UI
-    index = [lecture_index_entry(l) for l in lectures]
-    (PUBLIC_DIR / "lectures.json").write_text(json.dumps(index, ensure_ascii=False))
+    # Three orderings
+    random_order = random.sample(lectures, len(lectures))
+    alpha_order   = sorted(lectures, key=lambda l: l["title"].lower())
+    recent_order  = sorted(lectures, key=lambda l: l["date_added"], reverse=True)
 
     # Landing page
     tpl = env.get_template("index.html.jinja2")
@@ -112,20 +141,21 @@ def build():
     tpl = env.get_template("search.html.jinja2")
     (search_dir / "index.html").write_text(tpl.render(root="../"))
 
-    # Lectures list (static shell; data comes from lectures.json)
+    # Paginated lists
     lectures_dir = PUBLIC_DIR / "lectures"
     lectures_dir.mkdir()
-    tpl = env.get_template("lectures_list.html.jinja2")
-    (lectures_dir / "index.html").write_text(tpl.render(root="../"))
+    list_tpl = env.get_template("lectures_list.html.jinja2")
+    for mode, ordered in [("random", random_order), ("alpha", alpha_order), ("recent", recent_order)]:
+        pages = build_paginated(list_tpl, ordered, mode, lectures_dir / mode, root="../../")
+        print(f"  {mode}: {pages} page(s)")
 
-    # Per-lecture pages (fully rendered for pagefind indexing)
-    tpl = env.get_template("lectures_view.html.jinja2")
+    # Per-lecture pages
+    view_tpl = env.get_template("lectures_view.html.jinja2")
     for lecture in lectures:
-        (lectures_dir / f"{lecture['slug']}.html").write_text(tpl.render(lecture=lecture, root="../"))
+        (lectures_dir / f"{lecture['slug']}.html").write_text(view_tpl.render(lecture=lecture, root="../"))
 
     print(f"Built {len(lectures)} lectures -> {PUBLIC_DIR}")
 
-    # Build pagefind search index
     result = subprocess.run(["npx", "pagefind", "--site", str(PUBLIC_DIR)], capture_output=True, text=True)
     if result.returncode == 0:
         print("Pagefind index built.")
