@@ -1,0 +1,9 @@
+[build]
+  command = "curl -LsSf https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env && cd src && uv run ssg.py"
+  publish = "public"
+
+[build.environment]
+  PYTHON_VERSION = "3.13"
+
+# STATICFORMS_KEY and SITE_URL should be set in the Netlify UI under
+# Site configuration → Environment variables (not here, to avoid committing secrets)

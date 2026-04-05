@@ -1,0 +1,4 @@
+public/
+src/.venv/
+src/uv.lock
+__pycache__/

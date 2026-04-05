@@ -4,6 +4,7 @@
 import io
 import math
 import json
+import os
 import random
 import re
 import shutil
@@ -147,6 +148,11 @@ def build():
     alpha_order   = sorted(lectures, key=lambda l: l["title"].lower())
     recent_order  = sorted(lectures, key=lambda l: l["date_added"], reverse=True)
 
+    staticforms_key = os.environ.get("STATICFORMS_KEY", "YOUR_KEY_HERE")
+    site_url = os.environ.get("SITE_URL", "http://localhost:8000/")
+    if not site_url.endswith("/"):
+        site_url += "/"
+
     # Landing page
     tpl = env.get_template("index.html.jinja2")
     (PUBLIC_DIR / "index.html").write_text(tpl.render(root=""))
@@ -156,6 +162,16 @@ def build():
     search_dir.mkdir()
     tpl = env.get_template("search.html.jinja2")
     (search_dir / "index.html").write_text(tpl.render(root="../"))
+
+    # Submit page + thanks
+    submit_dir = PUBLIC_DIR / "submit"
+    submit_dir.mkdir()
+    tpl = env.get_template("submit.html.jinja2")
+    (submit_dir / "index.html").write_text(tpl.render(root="../", staticforms_key=staticforms_key, site_url=site_url))
+    thanks_dir = submit_dir / "thanks"
+    thanks_dir.mkdir()
+    tpl = env.get_template("submit_thanks.html.jinja2")
+    (thanks_dir / "index.html").write_text(tpl.render(root="../../"))
 
     # Paginated lists
     lectures_dir = PUBLIC_DIR / "lectures"
