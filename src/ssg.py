@@ -31,7 +31,9 @@ def load_lectures() -> list[dict]:
 
 
 def build():
-    PUBLIC_DIR.mkdir(exist_ok=True)
+    if PUBLIC_DIR.exists():
+        shutil.rmtree(PUBLIC_DIR)
+    PUBLIC_DIR.mkdir()
 
     # Copy stylesheet
     shutil.copy(TEMPLATES_DIR / "styles.css", PUBLIC_DIR / "styles.css")
@@ -39,16 +41,20 @@ def build():
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)), autoescape=True)
     lectures = load_lectures()
 
-    # Index page
+    # Landing page
+    tpl = env.get_template("index.html.jinja2")
+    (PUBLIC_DIR / "index.html").write_text(tpl.render())
+
+    # Lectures list
+    lectures_dir = PUBLIC_DIR / "lectures"
+    lectures_dir.mkdir(exist_ok=True)
     tpl = env.get_template("lectures_list.html.jinja2")
-    (PUBLIC_DIR / "index.html").write_text(tpl.render(lectures=lectures))
+    (lectures_dir / "index.html").write_text(tpl.render(lectures=lectures))
 
     # Per-lecture pages
     tpl = env.get_template("lectures_view.html.jinja2")
     for lecture in lectures:
-        out_dir = PUBLIC_DIR / lecture["slug"]
-        out_dir.mkdir(exist_ok=True)
-        (out_dir / "index.html").write_text(tpl.render(lecture=lecture))
+        (lectures_dir / f"{lecture['slug']}.html").write_text(tpl.render(lecture=lecture))
 
     print(f"Built {len(lectures)} lectures -> {PUBLIC_DIR}")
 
