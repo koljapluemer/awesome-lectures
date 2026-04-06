@@ -19,8 +19,10 @@
     border-color: var(--accent);
     color: #fff;
   }
-  .lecture-card { display: flex; gap: 1rem; align-items: center; color: inherit; text-decoration: none; }
+  .lecture-card { display: flex; gap: 1rem; align-items: center; }
   .lecture-card:hover { border-color: var(--accent); }
+  .lecture-link { display: flex; gap: 1rem; align-items: center; flex: 1; min-width: 0; color: inherit; text-decoration: none; }
+  .lecture-actions { display: flex; flex-direction: column; gap: 0.25rem; flex-shrink: 0; }
   .pagination { display: flex; align-items: center; justify-content: space-between; margin-top: 2rem; }
   .pagination a { font-size: 0.875rem; }
   .pagination .page-info { font-size: 0.875rem; color: var(--text-muted); }
@@ -40,21 +42,27 @@
 
   <div class="flex flex-col gap-md">
     {% for lecture in lectures %}
-    <a href="{{ root }}lectures/{{ lecture.slug }}.html" class="card lecture-card">
-      <img src="{{ root }}{{ lecture.thumbnail }}" alt="" width="120" style="border-radius:0.375rem; flex-shrink:0; object-fit:cover;">
-      <div>
-        <div class="text-lg font-bold">{{ lecture.title }}</div>
-        {% if lecture.speakers %}
-        <div class="text-sm text-muted mt-sm">{{ lecture.speakers | join(", ") }}</div>
-        {% endif %}
-        {% set all_tags = (lecture.topics or []) + (lecture.tags or []) %}
-        {% if all_tags %}
-        <div class="flex flex-wrap gap-sm mt-sm">
-          {% for t in all_tags %}<span class="tag">{{ t }}</span>{% endfor %}
+    <div class="card lecture-card">
+      <a href="{{ root }}lectures/{{ lecture.slug }}.html" class="lecture-link">
+        <img src="{{ root }}{{ lecture.thumbnail }}" alt="" width="120" style="border-radius:0.375rem; flex-shrink:0; object-fit:cover;">
+        <div>
+          <div class="text-lg font-bold">{{ lecture.title }}</div>
+          {% if lecture.speakers %}
+          <div class="text-sm text-muted mt-sm">{{ lecture.speakers | join(", ") }}</div>
+          {% endif %}
+          {% set all_tags = (lecture.topics or []) + (lecture.tags or []) %}
+          {% if all_tags %}
+          <div class="flex flex-wrap gap-sm mt-sm">
+            {% for t in all_tags %}<span class="tag">{{ t }}</span>{% endfor %}
+          </div>
+          {% endif %}
         </div>
-        {% endif %}
+      </a>
+      <div class="lecture-actions">
+        <button class="icon-btn" data-slug="{{ lecture.slug }}" data-action="like" aria-label="Like"><i data-lucide="heart" width="18" height="18"></i></button>
+        <button class="icon-btn" data-slug="{{ lecture.slug }}" data-action="seen" aria-label="Mark as seen"><i data-lucide="eye" width="18" height="18"></i></button>
       </div>
-    </a>
+    </div>
     {% endfor %}
   </div>
 

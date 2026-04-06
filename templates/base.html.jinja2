@@ -23,6 +23,24 @@
     header a:hover { color: var(--accent); text-decoration: none; }
     .header-nav { display: flex; gap: 1.5rem; align-items: center; }
   </style>
+  <style>
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem;
+      color: var(--text-muted);
+      border-radius: 0.25rem;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .icon-btn:hover { color: var(--text); }
+    .icon-btn[data-action="like"].active  { color: #e05575; }
+    .icon-btn[data-action="like"].active svg  { fill: #e05575; }
+    .icon-btn[data-action="seen"].active  { color: var(--accent); }
+    .icon-btn[data-action="seen"].active svg  { fill: var(--accent); }
+  </style>
   {% block head %}{% endblock %}
 </head>
 <body>
@@ -42,5 +60,26 @@
     {% block content %}{% endblock %}
   </main>
 
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>
+    lucide.createIcons();
+    const KEYS = { like: 'al_likes', seen: 'al_seen' };
+    function getSet(k) { return new Set(JSON.parse(localStorage.getItem(k) || '[]')); }
+    function saveSet(k, s) { localStorage.setItem(k, JSON.stringify([...s])); }
+    function refreshBtn(btn) {
+      const active = getSet(KEYS[btn.dataset.action]).has(btn.dataset.slug);
+      btn.classList.toggle('active', active);
+    }
+    document.querySelectorAll('.icon-btn').forEach(btn => {
+      refreshBtn(btn);
+      btn.addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation();
+        const s = getSet(KEYS[btn.dataset.action]);
+        s.has(btn.dataset.slug) ? s.delete(btn.dataset.slug) : s.add(btn.dataset.slug);
+        saveSet(KEYS[btn.dataset.action], s);
+        refreshBtn(btn);
+      });
+    });
+  </script>
 </body>
 </html>

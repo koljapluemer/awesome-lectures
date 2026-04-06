@@ -4,7 +4,11 @@
 
 {% block content %}
 <div class="container py-lg">
-  <h1 class="text-2xl font-bold mt-md mb-sm">{{ lecture.title }}</h1>
+  <div class="flex items-center gap-md mt-md mb-sm">
+    <h1 class="text-2xl font-bold" style="flex:1;">{{ lecture.title }}</h1>
+    <button class="icon-btn" data-slug="{{ lecture.slug }}" data-action="like" aria-label="Like"><i data-lucide="heart" width="20" height="20"></i></button>
+    <button class="icon-btn" data-slug="{{ lecture.slug }}" data-action="seen" aria-label="Mark as seen"><i data-lucide="eye" width="20" height="20"></i></button>
+  </div>
 
   {% if lecture.speakers %}
   <div class="text-md text-muted mb-md">{{ lecture.speakers | join(", ") }}</div>
