@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Lecture",
+  "description": "A single lecture or course entry in the awesome-lectures collection.",
+  "type": "object",
+  "required": ["title", "urls"],
+  "additionalProperties": false,
+  "definitions": {
+    "binaryRating": {
+      "description": "Bayesian like-count rating (Algorithm A). rating = Bayesian mean likes/day (float ≥ 0), weight = cumulative days active (int).",
+      "type": "object",
+      "required": ["rating", "weight"],
+      "additionalProperties": false,
+      "properties": {
+        "rating": { "type": "number", "minimum": 0 },
+        "weight": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "scaleRating": {
+      "description": "Bayesian 0–10 scale rating (Algorithm B). rating = Bayesian mean (0–10), spread = Bayesian std deviation, weight = cumulative vote count (int).",
+      "type": "object",
+      "required": ["rating", "weight"],
+      "additionalProperties": false,
+      "properties": {
+        "rating": { "type": "number", "minimum": 0, "maximum": 10 },
+        "spread": { "type": "number", "minimum": 0 },
+        "weight": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "properties": {
+    "title": {
+      "description": "Title of the lecture or course.",
+      "type": "string"
+    },
+    "urls": {
+      "description": "One or more URLs pointing to the lecture video or playlist.",
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" },
+          "minItems": 1
+        }
+      ]
+    },
+    "speakers": {
+      "description": "Names of the speaker(s) or presenter(s).",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "embed": {
+      "description": "Whether the video can be embedded (e.g. YouTube embed allowed).",
+      "type": "boolean"
+    },
+    "extra": {
+      "description": "Free-text description, abstract, or additional context.",
+      "type": "string"
+    },
+    "year": {
+      "description": "Year the lecture was recorded or published.",
+      "type": "integer"
+    },
+    "startsAt": {
+      "description": "Offset in seconds at which the relevant content starts.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "topics": {
+      "description": "Topic/category tags (coarse-grained, e.g. 'game-design').",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tags": {
+      "description": "Descriptive tags (e.g. 'conference', 'seminar').",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "learnings": {
+      "description": "What a viewer can learn from this lecture. Each element is an object whose keys describe a learning outcome and whose values are scale ratings.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": { "$ref": "#/definitions/scaleRating" }
+      }
+    },
+    "liked": {
+      "description": "Aggregate viewer like signal (binary — no rating scale, just positive signals).",
+      "$ref": "#/definitions/binaryRating"
+    },
+    "audioQuality": {
+      "description": "Audio quality rating (0–10 scale).",
+      "$ref": "#/definitions/scaleRating"
+    },
+    "videoQuality": {
+      "description": "Video quality rating (0–10 scale).",
+      "$ref": "#/definitions/scaleRating"
+    },
+    "beginnerExpertSpectrum": {
+      "description": "Where on the beginner–expert spectrum the content sits (0–10 scale). Low = very beginner-friendly, high = expert-level.",
+      "$ref": "#/definitions/scaleRating"
+    },
+    "worthWatchingWithoutVideo": {
+      "description": "How worthwhile the lecture is as audio-only (0–10 scale).",
+      "$ref": "#/definitions/scaleRating"
+    }
+  }
+}

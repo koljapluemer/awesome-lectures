@@ -4,7 +4,11 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["jinja2", "pillow"]
+dependencies = [
+    "jinja2",
+    "jsonschema>=4.26.0",
+    "pillow",
+]
 
 [project.scripts]
 ssg = "ssg:build"

@@ -5,24 +5,18 @@
     ],
     "learnings": [
         {
-            "make better games": 8,
-            "how card games are designed": 7
+            "make better games": { "rating": 8, "weight": 1, "spread": 0 },
+            "how card games are designed": { "rating": 7.3, "weight": 2, "spread": 2 }
         }
     ],
-    "beginnerExpertSpectrum": [
-        5,
-        1
-    ],
+    "beginnerExpertSpectrum": { "rating": 5, "weight": 1, "spread": 0 },
     "topics": [
         "game-design"
     ],
     "tags": [
         "conference"
     ],
-    "worthWatchingWithoutVideo": 7,
-    "liked": [
-        100,
-        1
-    ],
+    "worthWatchingWithoutVideo": { "rating": 7, "weight": 1 },
+    "liked": { "rating": 1, "weight": 1 },
     "embed": true
 }
