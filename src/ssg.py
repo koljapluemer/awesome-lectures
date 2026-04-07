@@ -95,7 +95,7 @@ def page_url(mode: str, page: int) -> str:
     return f"lectures/{mode}/{page}.html"
 
 
-def build_paginated(tpl, lectures: list[dict], mode: str, mode_dir: Path, root: str):
+def build_paginated(tpl, lectures: list[dict], mode: str, mode_dir: Path, root: str, **extra):
     total_pages = max(1, math.ceil(len(lectures) / PAGE_SIZE))
     mode_dir.mkdir()
     for page in range(1, total_pages + 1):
@@ -113,6 +113,7 @@ def build_paginated(tpl, lectures: list[dict], mode: str, mode_dir: Path, root: 
                 "alpha":  "lectures/alpha/",
                 "recent": "lectures/recent/",
             },
+            **extra,
         }
         filename = "index.html" if page == 1 else f"{page}.html"
         (mode_dir / filename).write_text(tpl.render(**ctx))
@@ -154,53 +155,59 @@ def build():
     site_url = os.environ.get("SITE_URL", "http://localhost:8000/")
     if not site_url.endswith("/"):
         site_url += "/"
+    # API_BASE controls frontend API calls:
+    #   unset      → None  → API calls disabled (local preview without backend)
+    #   ""         → ""    → relative /api/... calls (production via Netlify proxy)
+    #   "http://localhost:5000" → that URL (local dev with backend running)
+    api_base_env = os.environ.get("API_BASE")
+    api_base = api_base_env.rstrip("/") if api_base_env is not None else None
+
+    common = {"api_base": api_base}
 
     # Landing page
     tpl = env.get_template("index.html.jinja2")
-    (PUBLIC_DIR / "index.html").write_text(tpl.render(root=""))
+    (PUBLIC_DIR / "index.html").write_text(tpl.render(root="", **common))
 
     # Search page
     search_dir = PUBLIC_DIR / "search"
     search_dir.mkdir()
     tpl = env.get_template("search.html.jinja2")
-    (search_dir / "index.html").write_text(tpl.render(root="../"))
+    (search_dir / "index.html").write_text(tpl.render(root="../", **common))
 
     # About page
     about_dir = PUBLIC_DIR / "about"
     about_dir.mkdir()
     tpl = env.get_template("about.html.jinja2")
-    (about_dir / "index.html").write_text(tpl.render(root="../"))
+    (about_dir / "index.html").write_text(tpl.render(root="../", **common))
 
     # Submit page + thanks
     submit_dir = PUBLIC_DIR / "submit"
     submit_dir.mkdir()
     tpl = env.get_template("submit.html.jinja2")
-    (submit_dir / "index.html").write_text(tpl.render(root="../", staticforms_key=staticforms_key, site_url=site_url))
+    (submit_dir / "index.html").write_text(tpl.render(root="../", staticforms_key=staticforms_key, site_url=site_url, **common))
     thanks_dir = submit_dir / "thanks"
     thanks_dir.mkdir()
     tpl = env.get_template("submit_thanks.html.jinja2")
-    (thanks_dir / "index.html").write_text(tpl.render(root="../../"))
+    (thanks_dir / "index.html").write_text(tpl.render(root="../../", **common))
 
     # Paginated lists
     lectures_dir = PUBLIC_DIR / "lectures"
     lectures_dir.mkdir()
     list_tpl = env.get_template("lectures_list.html.jinja2")
     for mode, ordered in [("random", random_order), ("alpha", alpha_order), ("recent", recent_order)]:
-        pages = build_paginated(list_tpl, ordered, mode, lectures_dir / mode, root="../../")
+        pages = build_paginated(list_tpl, ordered, mode, lectures_dir / mode, root="../../", **common)
         print(f"  {mode}: {pages} page(s)")
 
     # Per-lecture pages
     view_tpl = env.get_template("lectures_view.html.jinja2")
     for lecture in lectures:
-        (lectures_dir / f"{lecture['slug']}.html").write_text(view_tpl.render(lecture=lecture, root="../"))
+        (lectures_dir / f"{lecture['slug']}.html").write_text(view_tpl.render(lecture=lecture, root="../", **common))
 
     print(f"Built {len(lectures)} lectures -> {PUBLIC_DIR}")
 
-    result = subprocess.run(["npx", "pagefind", "--site", str(PUBLIC_DIR)], capture_output=True, text=True)
-    if result.returncode == 0:
-        print("Pagefind index built.")
-    else:
-        print(f"Pagefind failed (is npx available?):\n{result.stderr}")
+    result = subprocess.run(["npx", "--yes", "pagefind", "--site", str(PUBLIC_DIR)])
+    if result.returncode != 0:
+        print("Pagefind failed (is npx available?)")
 
 
 if __name__ == "__main__":

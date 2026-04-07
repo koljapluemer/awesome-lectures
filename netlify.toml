@@ -2,5 +2,12 @@
   command = "curl -LsSf https://astral.sh/uv/install.sh | sh && export PATH=$HOME/.local/bin:$PATH && cd src && uv run ssg.py"
   publish = "public"
 
-# STATICFORMS_KEY and SITE_URL must be set in the Netlify UI under
-# Site configuration → Environment variables
+# Required env vars in Netlify UI (Site configuration → Environment variables):
+#   STATICFORMS_KEY, SITE_URL
+#   API_BASE  — set to empty string "" to enable the proxy rewrite below
+
+[[redirects]]
+  from   = "/api/*"
+  to     = "https://your-vps.com/api/:splat"
+  status = 200
+  force  = true

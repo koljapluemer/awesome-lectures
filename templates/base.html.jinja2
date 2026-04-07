@@ -60,8 +60,12 @@
     {% block content %}{% endblock %}
   </main>
 
+  <div id="toast-rack"></div>
+
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script>
+    const AL_API_BASE = {{ api_base | tojson }};
+
     lucide.createIcons();
     const KEYS = { like: 'al_likes', seen: 'al_seen' };
     function getSet(k) { return new Set(JSON.parse(localStorage.getItem(k) || '[]')); }
@@ -70,14 +74,41 @@
       const active = getSet(KEYS[btn.dataset.action]).has(btn.dataset.slug);
       btn.classList.toggle('active', active);
     }
+    function toast(msg, isError) {
+      const el = document.createElement('div');
+      el.className = 'toast' + (isError ? ' error' : '');
+      el.textContent = msg;
+      document.getElementById('toast-rack').appendChild(el);
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+      setTimeout(() => {
+        el.classList.remove('show');
+        el.addEventListener('transitionend', () => el.remove(), { once: true });
+      }, isError ? 4000 : 2000);
+    }
+    function getFingerprint() {
+      let fp = localStorage.getItem('al_fp');
+      if (!fp) { fp = crypto.randomUUID(); localStorage.setItem('al_fp', fp); }
+      return fp;
+    }
+    function recordInteraction(slug, action) {
+      if (AL_API_BASE === null) return;
+      fetch(`${AL_API_BASE}/api/interactions/${encodeURIComponent(slug)}/${action}`, {
+        method: 'POST',
+        headers: { 'X-AL-Fingerprint': getFingerprint() },
+      })
+        .then(r => { if (r.ok) toast('vote saved'); else throw new Error(); })
+        .catch(() => toast('vote could not be saved; this is probably a problem on my side', true));
+    }
     document.querySelectorAll('.icon-btn').forEach(btn => {
       refreshBtn(btn);
       btn.addEventListener('click', e => {
         e.preventDefault(); e.stopPropagation();
         const s = getSet(KEYS[btn.dataset.action]);
-        s.has(btn.dataset.slug) ? s.delete(btn.dataset.slug) : s.add(btn.dataset.slug);
+        const wasActive = s.has(btn.dataset.slug);
+        wasActive ? s.delete(btn.dataset.slug) : s.add(btn.dataset.slug);
         saveSet(KEYS[btn.dataset.action], s);
         refreshBtn(btn);
+        if (!wasActive) recordInteraction(btn.dataset.slug, btn.dataset.action);
       });
     });
   </script>
