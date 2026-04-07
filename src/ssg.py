@@ -165,6 +165,7 @@ def build():
     PUBLIC_DIR.mkdir()
 
     shutil.copy(TEMPLATES_DIR / "styles.css", PUBLIC_DIR / "styles.css")
+    shutil.copy(TEMPLATES_DIR / "lectures_view.js", PUBLIC_DIR / "lectures_view.js")
     shutil.copy(ROOT / "misc" / "favicon.ico", PUBLIC_DIR / "favicon.ico")
     shutil.copy(ROOT / "misc" / "logo.png", PUBLIC_DIR / "logo.png")
 

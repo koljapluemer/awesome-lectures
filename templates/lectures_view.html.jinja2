@@ -48,96 +48,22 @@
     </div>
   </dialog>
 
-  <script>
+  <dialog id="vote-modal" class="al-modal">
+    <h3 id="vote-modal-title">Rate</h3>
+    <input type="range" id="vote-slider" min="0" max="10" step="0.5" value="5" style="width:100%;margin-bottom:0.25rem;accent-color:var(--accent);">
+    <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-bottom:0.75rem;"><span>0</span><span>5</span><span>10</span></div>
+    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;">
+      <input type="number" id="vote-number" min="0" max="10" step="0.5" value="5" class="al-input" style="margin-bottom:0;width:5rem;">
+      <span class="text-sm text-muted">/ 10</span>
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="vote-cancel">Cancel</button>
+      <button type="button" id="vote-submit" data-primary>Submit</button>
+    </div>
+  </dialog>
+
   {% set all_tags = (lecture.topics or []) + (lecture.tags or []) %}
-    (function () {
-      const slug = {{ lecture.slug | tojson }};
-
-      // — single suggest —
-      const modal = document.getElementById('tag-modal');
-      document.getElementById('suggest-tag-btn').addEventListener('click', () => {
-        document.getElementById('tag-input').value = '';
-        modal.showModal();
-      });
-      document.getElementById('tag-cancel').addEventListener('click', () => modal.close());
-      modal.addEventListener('click', e => { if (e.target === modal) modal.close(); });
-      document.getElementById('tag-submit').addEventListener('click', () => {
-        const topic = document.getElementById('tag-input').value.trim();
-        if (!topic) return;
-        modal.close();
-        if (AL_API_BASE === null) return;
-        fetch(`${AL_API_BASE}/api/suggestions/topics/${encodeURIComponent(slug)}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-AL-Fingerprint': getFingerprint() },
-          body: JSON.stringify({ topic }),
-        })
-          .then(r => { if (r.ok) toast('Tag suggestion submitted, thanks!'); else throw new Error(); })
-          .catch(() => toast('Could not submit suggestion', true));
-      });
-
-      // — edit tags —
-      const currentTags = {{ all_tags | tojson }};
-      const editModal = document.getElementById('edit-tags-modal');
-      const chipsEl   = document.getElementById('edit-tags-chips');
-      const editInput = document.getElementById('edit-tags-input');
-      let toRemove, toAdd;
-
-      function renderChips() {
-        chipsEl.innerHTML = '';
-        currentTags.forEach(tag => {
-          const chip = document.createElement('span');
-          chip.className = 'edit-chip' + (toRemove.has(tag) ? ' marked' : '');
-          chip.innerHTML = `${tag} <button type="button" aria-label="Toggle remove ${tag}">✕</button>`;
-          chip.querySelector('button').addEventListener('click', () => {
-            toRemove.has(tag) ? toRemove.delete(tag) : toRemove.add(tag);
-            renderChips();
-          });
-          chipsEl.appendChild(chip);
-        });
-        toAdd.forEach((tag, i) => {
-          const chip = document.createElement('span');
-          chip.className = 'edit-chip new-tag';
-          chip.innerHTML = `${tag} <button type="button" aria-label="Remove ${tag}">✕</button>`;
-          chip.querySelector('button').addEventListener('click', () => {
-            toAdd.splice(i, 1); renderChips();
-          });
-          chipsEl.appendChild(chip);
-        });
-      }
-
-      document.getElementById('edit-tags-btn').addEventListener('click', () => {
-        toRemove = new Set(); toAdd = [];
-        editInput.value = '';
-        renderChips();
-        editModal.showModal();
-      });
-      function commitEditInput() {
-        const tag = editInput.value.trim().replace(/,$/, '');
-        if (tag && !currentTags.includes(tag) && !toAdd.includes(tag)) { toAdd.push(tag); renderChips(); }
-        editInput.value = '';
-      }
-      editInput.addEventListener('keydown', e => {
-        if (e.key !== 'Enter' && e.key !== ',') return;
-        e.preventDefault();
-        commitEditInput();
-      });
-      document.getElementById('edit-tags-add').addEventListener('click', commitEditInput);
-      document.getElementById('edit-tags-cancel').addEventListener('click', () => editModal.close());
-      editModal.addEventListener('click', e => { if (e.target === editModal) editModal.close(); });
-      document.getElementById('edit-tags-submit').addEventListener('click', () => {
-        const add = toAdd.slice(), remove = [...toRemove];
-        editModal.close();
-        if (AL_API_BASE === null || (!add.length && !remove.length)) return;
-        fetch(`${AL_API_BASE}/api/suggestions/tags/${encodeURIComponent(slug)}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-AL-Fingerprint': getFingerprint() },
-          body: JSON.stringify({ add, remove }),
-        })
-          .then(r => { if (r.ok) toast('Tag suggestions submitted, thanks!'); else throw new Error(); })
-          .catch(() => toast('Could not submit suggestions', true));
-      });
-    })();
-  </script>
+  <script>window.AL_VIEW = { slug: {{ lecture.slug | tojson }}, tags: {{ all_tags | tojson }} };</script>
 
   {% if lecture.video_id and lecture.embed %}
   <div class="video-wrapper mb-lg">
@@ -159,7 +85,7 @@
   </div>
   {% endif %}
 
-  {% macro rating_bar(label, item) %}
+  {% macro rating_bar(label, item, field) %}
   <div>
     <div class="text-sm text-muted mb-xs">{{ label }}</div>
     <div style="display:flex;align-items:center;gap:0.6rem;">
@@ -179,14 +105,15 @@
       <div style="flex:1;height:16px;border-radius:4px;border:1px dashed #bbb;"></div>
       <span style="font-weight:700;font-size:0.95rem;min-width:2.8rem;text-align:center;flex-shrink:0;color:var(--text-muted);">?</span>
       {% endif %}
+      <button class="vote-btn" data-field="{{ field }}" data-label="{{ label }}" data-current="{{ item.rating if item else 5 }}" aria-label="Rate {{ label }}"><i data-lucide="star" width="14" height="14"></i></button>
     </div>
   </div>
   {% endmacro %}
   <div class="card flex flex-col gap-sm">
-    {{ rating_bar("Audio quality", lecture.audioQuality) }}
-    {{ rating_bar("Video quality", lecture.videoQuality) }}
-    {{ rating_bar("Beginner–expert level", lecture.beginnerExpertSpectrum) }}
-    {{ rating_bar("Worth watching without video", lecture.worthWatchingWithoutVideo) }}
+    {{ rating_bar("Audio quality", lecture.audioQuality, "audioQuality") }}
+    {{ rating_bar("Video quality", lecture.videoQuality, "videoQuality") }}
+    {{ rating_bar("Beginner–expert level", lecture.beginnerExpertSpectrum, "beginnerExpertSpectrum") }}
+    {{ rating_bar("Worth watching without video", lecture.worthWatchingWithoutVideo, "worthWatchingWithoutVideo") }}
   </div>
 
   {% if lecture.learnings %}
@@ -205,7 +132,10 @@
         <div style="position:absolute;left:{{ m }}%;top:0;bottom:0;width:2px;background:#111;transform:translateX(-50%);"></div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;padding-left:0.75rem;border-left:1px solid var(--border);font-weight:700;font-size:0.95rem;flex-shrink:0;min-width:2.8rem;justify-content:center;">{{ item.rating | round(1) }}</div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.25rem;padding-left:0.75rem;border-left:1px solid var(--border);flex-shrink:0;min-width:2.8rem;">
+      <span style="font-weight:700;font-size:0.95rem;">{{ item.rating | round(1) }}</span>
+      <button class="vote-btn" data-field="learnings:{{ item.key }}" data-label="{{ item.key }}" data-current="{{ item.rating }}" aria-label="Rate {{ item.key }}"><i data-lucide="star" width="12" height="12"></i></button>
+    </div>
   </div>
   {% endmacro %}
   {% set all_items = lecture.learnings | sorted_learnings %}
@@ -224,5 +154,6 @@
     {% endif %}
   </div>
   {% endif %}
+  <script src="{{ root }}lectures_view.js" defer></script>
 </div>
 {% endblock %}

@@ -32,6 +32,16 @@ CREATE TABLE IF NOT EXISTS lecture_suggestions (
   created_at     TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
+-- User-submitted numerical ratings for scale fields
+CREATE TABLE IF NOT EXISTS rating_votes (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  fingerprint_id TEXT    NOT NULL REFERENCES fingerprints(id),
+  slug           TEXT    NOT NULL,
+  field          TEXT    NOT NULL,
+  value          REAL    NOT NULL CHECK(value >= 0 AND value <= 10),
+  created_at     TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
 -- User-suggested tag additions and removals for existing lectures
 CREATE TABLE IF NOT EXISTS topic_suggestions (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,

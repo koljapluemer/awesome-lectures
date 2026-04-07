@@ -145,6 +145,20 @@ hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
 }
 .modal-actions button[data-primary], .modal-btn[data-primary] { background: var(--accent); border-color: var(--accent); color: #fff; }
 
+/* === Vote button === */
+.vote-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.1rem 0.25rem;
+  color: var(--text-muted);
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.vote-btn:hover { color: var(--accent); }
+
 /* === Tag pill button === */
 .tag-pill-btn {
   display: inline-flex;
