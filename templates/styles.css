@@ -103,6 +103,75 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
 /* === Divider === */
 hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
 
+/* === Modal === */
+.al-modal {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  color: var(--text);
+  max-width: 360px;
+  width: calc(100% - 2rem);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  margin: auto;
+}
+.al-modal::backdrop { background: rgba(0,0,0,0.4); }
+.al-modal h3 { margin: 0 0 1rem; font-size: 1rem; font-weight: 700; }
+
+/* === Shared input === */
+.al-input {
+  display: block;
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+.al-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* === Modal actions === */
+.modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+.modal-actions button, .modal-btn {
+  padding: 0.35rem 0.9rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 0.875rem;
+  background: var(--bg-card);
+  color: var(--text);
+}
+.modal-actions button[data-primary], .modal-btn[data-primary] { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* === Tag pill button === */
+.tag-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  cursor: pointer;
+}
+.tag-pill-btn:hover { color: var(--text); border-color: var(--accent); }
+
+/* === Edit-tags chips === */
+.edit-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; min-height: 1.5rem; margin-bottom: 0.75rem; }
+.edit-chip {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.15rem 0.4rem 0.15rem 0.6rem;
+  border-radius: 999px; font-size: 0.8rem;
+  border: 1px solid var(--border); background: var(--bg);
+}
+.edit-chip.marked { text-decoration: line-through; opacity: 0.45; }
+.edit-chip.new-tag { border-color: var(--accent); color: var(--accent); }
+.edit-chip button { background: none; border: none; cursor: pointer; padding: 0 0.1rem; font-size: 0.8rem; color: inherit; line-height: 1; }
+
 /* === Toast === */
 #toast-rack {
   position: fixed;

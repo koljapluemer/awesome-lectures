@@ -112,6 +112,14 @@ def load_lectures() -> list[dict]:
             print(f"  embed check {path.stem}: {data['embed']}")
             path.write_text(json.dumps(data, indent=4, ensure_ascii=False) + "\n")
 
+        # Normalise tags/topics: {name: count} → [name] filtered to count > 0
+        for field in ("topics", "tags"):
+            raw = data.get(field)
+            if isinstance(raw, dict):
+                data[field] = [k for k, v in raw.items() if v > 0]
+            elif raw is None:
+                data[field] = []
+
         data["slug"] = path.stem
         data["video_id"] = video_id
         data["date_added"] = git_date_added(path)

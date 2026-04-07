@@ -67,14 +67,14 @@
       "minimum": 0
     },
     "topics": {
-      "description": "Topic/category tags (coarse-grained, e.g. 'game-design').",
-      "type": "array",
-      "items": { "type": "string" }
+      "description": "Topic/category tags (coarse-grained, e.g. 'game-design'). Keys are tag names, values are community vote counts; tags with count ≤ 0 are hidden by the SSG.",
+      "type": "object",
+      "additionalProperties": { "type": "integer" }
     },
     "tags": {
-      "description": "Descriptive tags (e.g. 'conference', 'seminar').",
-      "type": "array",
-      "items": { "type": "string" }
+      "description": "Descriptive tags (e.g. 'conference', 'seminar'). Keys are tag names, values are community vote counts; tags with count ≤ 0 are hidden by the SSG.",
+      "type": "object",
+      "additionalProperties": { "type": "integer" }
     },
     "learnings": {
       "description": "What a viewer can learn from this lecture. Each element is an object whose keys describe a learning outcome and whose values are scale ratings.",

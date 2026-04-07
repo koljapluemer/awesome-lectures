@@ -14,13 +14,130 @@
   <div class="text-md text-muted mb-md">{{ lecture.speakers | join(", ") }}</div>
   {% endif %}
 
-  {% if lecture.topics or lecture.tags %}
-  <div class="flex flex-wrap gap-sm mb-md">
+  <div class="flex flex-wrap gap-sm mb-md" style="align-items:center;">
     {% for t in (lecture.topics or []) + (lecture.tags or []) %}
     <span class="tag">{{ t }}</span>
     {% endfor %}
+    <button class="tag-pill-btn" id="suggest-tag-btn" aria-label="Suggest a tag">
+      <i data-lucide="tag" width="12" height="12"></i> suggest a tag
+    </button>
+    <button class="tag-pill-btn" id="edit-tags-btn" aria-label="Edit tags">
+      <i data-lucide="pencil" width="12" height="12"></i> edit tags
+    </button>
   </div>
-  {% endif %}
+
+  <dialog id="tag-modal" class="al-modal">
+    <h3>Suggest a tag</h3>
+    <input type="text" id="tag-input" class="al-input" placeholder="e.g. seminar, game-design" autocomplete="off">
+    <div class="modal-actions">
+      <button type="button" id="tag-cancel">Cancel</button>
+      <button type="button" id="tag-submit" data-primary>Submit</button>
+    </div>
+  </dialog>
+
+  <dialog id="edit-tags-modal" class="al-modal">
+    <h3>Edit tags</h3>
+    <div class="edit-chips" id="edit-tags-chips"></div>
+    <div style="display:flex;gap:0.5rem;">
+      <input type="text" id="edit-tags-input" class="al-input" style="margin-bottom:0;flex:1;" placeholder="Add a tag…" autocomplete="off">
+      <button type="button" id="edit-tags-add" class="modal-btn">Add</button>
+    </div>
+    <div class="modal-actions" style="margin-top:1rem;">
+      <button type="button" id="edit-tags-cancel">Cancel</button>
+      <button type="button" id="edit-tags-submit" data-primary>Submit</button>
+    </div>
+  </dialog>
+
+  <script>
+  {% set all_tags = (lecture.topics or []) + (lecture.tags or []) %}
+    (function () {
+      const slug = {{ lecture.slug | tojson }};
+
+      // — single suggest —
+      const modal = document.getElementById('tag-modal');
+      document.getElementById('suggest-tag-btn').addEventListener('click', () => {
+        document.getElementById('tag-input').value = '';
+        modal.showModal();
+      });
+      document.getElementById('tag-cancel').addEventListener('click', () => modal.close());
+      modal.addEventListener('click', e => { if (e.target === modal) modal.close(); });
+      document.getElementById('tag-submit').addEventListener('click', () => {
+        const topic = document.getElementById('tag-input').value.trim();
+        if (!topic) return;
+        modal.close();
+        if (AL_API_BASE === null) return;
+        fetch(`${AL_API_BASE}/api/suggestions/topics/${encodeURIComponent(slug)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-AL-Fingerprint': getFingerprint() },
+          body: JSON.stringify({ topic }),
+        })
+          .then(r => { if (r.ok) toast('Tag suggestion submitted, thanks!'); else throw new Error(); })
+          .catch(() => toast('Could not submit suggestion', true));
+      });
+
+      // — edit tags —
+      const currentTags = {{ all_tags | tojson }};
+      const editModal = document.getElementById('edit-tags-modal');
+      const chipsEl   = document.getElementById('edit-tags-chips');
+      const editInput = document.getElementById('edit-tags-input');
+      let toRemove, toAdd;
+
+      function renderChips() {
+        chipsEl.innerHTML = '';
+        currentTags.forEach(tag => {
+          const chip = document.createElement('span');
+          chip.className = 'edit-chip' + (toRemove.has(tag) ? ' marked' : '');
+          chip.innerHTML = `${tag} <button type="button" aria-label="Toggle remove ${tag}">✕</button>`;
+          chip.querySelector('button').addEventListener('click', () => {
+            toRemove.has(tag) ? toRemove.delete(tag) : toRemove.add(tag);
+            renderChips();
+          });
+          chipsEl.appendChild(chip);
+        });
+        toAdd.forEach((tag, i) => {
+          const chip = document.createElement('span');
+          chip.className = 'edit-chip new-tag';
+          chip.innerHTML = `${tag} <button type="button" aria-label="Remove ${tag}">✕</button>`;
+          chip.querySelector('button').addEventListener('click', () => {
+            toAdd.splice(i, 1); renderChips();
+          });
+          chipsEl.appendChild(chip);
+        });
+      }
+
+      document.getElementById('edit-tags-btn').addEventListener('click', () => {
+        toRemove = new Set(); toAdd = [];
+        editInput.value = '';
+        renderChips();
+        editModal.showModal();
+      });
+      function commitEditInput() {
+        const tag = editInput.value.trim().replace(/,$/, '');
+        if (tag && !currentTags.includes(tag) && !toAdd.includes(tag)) { toAdd.push(tag); renderChips(); }
+        editInput.value = '';
+      }
+      editInput.addEventListener('keydown', e => {
+        if (e.key !== 'Enter' && e.key !== ',') return;
+        e.preventDefault();
+        commitEditInput();
+      });
+      document.getElementById('edit-tags-add').addEventListener('click', commitEditInput);
+      document.getElementById('edit-tags-cancel').addEventListener('click', () => editModal.close());
+      editModal.addEventListener('click', e => { if (e.target === editModal) editModal.close(); });
+      document.getElementById('edit-tags-submit').addEventListener('click', () => {
+        const add = toAdd.slice(), remove = [...toRemove];
+        editModal.close();
+        if (AL_API_BASE === null || (!add.length && !remove.length)) return;
+        fetch(`${AL_API_BASE}/api/suggestions/tags/${encodeURIComponent(slug)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-AL-Fingerprint': getFingerprint() },
+          body: JSON.stringify({ add, remove }),
+        })
+          .then(r => { if (r.ok) toast('Tag suggestions submitted, thanks!'); else throw new Error(); })
+          .catch(() => toast('Could not submit suggestions', true));
+      });
+    })();
+  </script>
 
   {% if lecture.video_id and lecture.embed %}
   <div class="video-wrapper mb-lg">

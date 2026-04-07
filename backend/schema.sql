@@ -32,11 +32,12 @@ CREATE TABLE IF NOT EXISTS lecture_suggestions (
   created_at     TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
--- Future: user-suggested topics for existing lectures
+-- User-suggested tag additions and removals for existing lectures
 CREATE TABLE IF NOT EXISTS topic_suggestions (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,
   fingerprint_id TEXT    NOT NULL REFERENCES fingerprints(id),
   slug           TEXT    NOT NULL,
   topic          TEXT    NOT NULL,
+  action         TEXT    NOT NULL DEFAULT 'add' CHECK(action IN ('add', 'remove')),
   created_at     TEXT    NOT NULL DEFAULT (datetime('now'))
 );

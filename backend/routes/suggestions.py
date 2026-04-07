@@ -24,6 +24,7 @@ def suggest_lecture():
 
 @bp.post("/topics/<slug>")
 def suggest_topic(slug):
+    """Single tag addition."""
     if not g.fingerprint:
         return jsonify({"error": "missing fingerprint"}), 400
     data = request.get_json(silent=True) or {}
@@ -33,8 +34,28 @@ def suggest_topic(slug):
 
     db = get_db()
     db.execute(
-        "INSERT INTO topic_suggestions (fingerprint_id, slug, topic) VALUES (?, ?, ?)",
+        "INSERT INTO topic_suggestions (fingerprint_id, slug, topic, action) VALUES (?, ?, ?, 'add')",
         (g.fingerprint, slug, topic),
+    )
+    db.commit()
+    return jsonify({"status": "ok"}), 201
+
+
+@bp.post("/tags/<slug>")
+def suggest_tags(slug):
+    """Batch tag additions and/or removals."""
+    if not g.fingerprint:
+        return jsonify({"error": "missing fingerprint"}), 400
+    data = request.get_json(silent=True) or {}
+    add    = [t.strip() for t in data.get("add",    []) if str(t).strip()]
+    remove = [t.strip() for t in data.get("remove", []) if str(t).strip()]
+    if not add and not remove:
+        return jsonify({"error": "nothing to do"}), 400
+
+    db = get_db()
+    db.executemany(
+        "INSERT INTO topic_suggestions (fingerprint_id, slug, topic, action) VALUES (?, ?, ?, ?)",
+        [(g.fingerprint, slug, t, action) for action, tags in (("add", add), ("remove", remove)) for t in tags],
     )
     db.commit()
     return jsonify({"status": "ok"}), 201

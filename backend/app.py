@@ -13,7 +13,7 @@ def create_app(config=Config):
     app = Flask(__name__)
     app.config.from_object(config)
 
-    CORS(app, origins=app.config["ALLOWED_ORIGINS"], allow_headers=[FP_HEADER])
+    CORS(app, origins=app.config["ALLOWED_ORIGINS"], allow_headers=[FP_HEADER, "Content-Type"])
     app.teardown_appcontext(close_db)
 
     app.register_blueprint(interactions_bp)
