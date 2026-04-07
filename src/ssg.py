@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Static site generator: data/ + templates/ -> public/"""
 
+import colorsys
+import hashlib
 import io
 import math
 import json
@@ -17,6 +19,35 @@ from jinja2 import Environment, FileSystemLoader
 from PIL import Image
 
 ROOT = Path(__file__).parent.parent
+
+
+def _hue_from_str(s: str) -> str:
+    """Deterministic HSV colour (fixed S=0.72, V=0.85) from a string key."""
+    h = int(hashlib.md5(s.encode()).hexdigest(), 16) % 360 / 360
+    r, g, b = colorsys.hsv_to_rgb(h, 0.72, 0.85)
+    return f"#{int(r * 255):02x}{int(g * 255):02x}{int(b * 255):02x}"
+
+
+def _mix_white(color_hex: str, t: float) -> str:
+    """Interpolate between white (t=0) and color_hex (t=1)."""
+    r = int(color_hex[1:3], 16)
+    g = int(color_hex[3:5], 16)
+    b = int(color_hex[5:7], 16)
+    return f"#{int(255 + (r - 255) * t):02x}{int(255 + (g - 255) * t):02x}{int(255 + (b - 255) * t):02x}"
+
+
+def _sorted_learnings(learnings: list) -> list:
+    """Flatten the learnings list-of-dicts and sort by Bayesian rating (desc).
+
+    The stored rating is already the Bayesian mean (prior baked in), so no
+    further adjustment is needed — higher rating = higher confidence-adjusted score.
+    """
+    items = []
+    for block in learnings:
+        for key, val in block.items():
+            items.append({"key": key, **val})
+    items.sort(key=lambda x: x["rating"], reverse=True)
+    return items
 DATA_DIR = ROOT / "data"
 TEMPLATES_DIR = ROOT / "templates"
 PUBLIC_DIR = ROOT / "public"
@@ -130,6 +161,9 @@ def build():
     shutil.copy(ROOT / "misc" / "logo.png", PUBLIC_DIR / "logo.png")
 
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)), autoescape=True)
+    env.filters["hue_from_str"] = _hue_from_str
+    env.filters["mix_white"] = _mix_white
+    env.filters["sorted_learnings"] = _sorted_learnings
     lectures = load_lectures()
 
     # Thumbnails

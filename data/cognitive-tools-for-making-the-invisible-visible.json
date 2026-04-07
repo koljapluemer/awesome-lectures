@@ -6,5 +6,10 @@
     "speakers": [
         "Prof. Judy Fan"
     ],
-    "embed": true
+    "embed": true,
+        "learnings": [
+        {
+            "learn about the psychology of abstract sketches": { "rating": 7, "weight": 2, "spread": 2.5 }
+        }
+    ]
 }

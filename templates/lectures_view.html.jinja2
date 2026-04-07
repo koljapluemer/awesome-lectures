@@ -55,14 +55,39 @@
   </div>
 
   {% if lecture.learnings %}
-  <h2 class="text-lg font-bold mt-lg mb-sm">Learnings</h2>
-  <ul class="flex flex-col gap-sm" style="padding-left:1.25rem; list-style:disc;">
-    {% for item in lecture.learnings %}
-    {% for key, val in item.items() %}
-    <li class="text-sm"><span class="font-bold">{{ key }}</span>: {{ val }}/10</li>
-    {% endfor %}
-    {% endfor %}
-  </ul>
+  {% macro learning_card(item) %}
+  {% set color = item.key | hue_from_str %}
+  {% set spread = [item.spread | default(0), 0.1] | max %}
+  {% set l = ([item.rating - spread, 0]  | max) * 10 %}
+  {% set r = ([item.rating + spread, 10] | min) * 10 %}
+  {% set m = item.rating * 10 %}
+  {% set c_l = color | mix_white(l / 100) %}
+  {% set c_r = color | mix_white(r / 100) %}
+  <div class="card" style="padding:0.5rem 0.75rem;display:flex;align-items:stretch;gap:0.75rem;">
+    <div style="flex:1;">
+      <div class="text-sm font-bold mb-xs">{{ item.key }}</div>
+      <div style="position:relative;height:16px;border-radius:4px;overflow:hidden;background:linear-gradient(to right,#d4d4d4 0%,#d4d4d4 {{ l }}%,{{ c_l }} {{ l }}%,{{ c_r }} {{ r }}%,#d4d4d4 {{ r }}%,#d4d4d4 100%);">
+        <div style="position:absolute;left:{{ m }}%;top:0;bottom:0;width:2px;background:#111;transform:translateX(-50%);"></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;padding-left:0.75rem;border-left:1px solid var(--border);font-weight:700;font-size:0.95rem;flex-shrink:0;min-width:2.8rem;justify-content:center;">{{ item.rating | round(1) }}</div>
+  </div>
+  {% endmacro %}
+  {% set all_items = lecture.learnings | sorted_learnings %}
+  {% set above = all_items | selectattr('rating', 'ge', 5) | list %}
+  {% set below = all_items | rejectattr('rating', 'ge', 5) | list %}
+  <h2 class="text-lg font-bold mt-lg mb-sm">Watch this if you want to...</h2>
+  <div class="flex flex-col gap-sm">
+    {% for item in above %}{{ learning_card(item) }}{% endfor %}
+    {% if below %}
+    <details>
+      <summary class="text-sm text-muted" style="cursor:pointer;user-select:none;">{{ below | length }} lower-rated {{ 'learning' if below | length == 1 else 'learnings' }}</summary>
+      <div class="flex flex-col gap-sm mt-sm">
+        {% for item in below %}{{ learning_card(item) }}{% endfor %}
+      </div>
+    </details>
+    {% endif %}
+  </div>
   {% endif %}
 </div>
 {% endblock %}

@@ -6,7 +6,8 @@
     "learnings": [
         {
             "make better games": { "rating": 8, "weight": 1, "spread": 0 },
-            "how card games are designed": { "rating": 7.3, "weight": 2, "spread": 2 }
+            "understand how card games are designed": { "rating": 7.3, "weight": 2, "spread": 2 },
+            "learn how Magic:The Gathering was made": {"rating": 3, "weight": 1, "spread": 0}
         }
     ],
     "beginnerExpertSpectrum": { "rating": 5, "weight": 1, "spread": 0 },
