@@ -4,7 +4,17 @@
     "speakers": [
         "John S. McNamara"
     ],
-    "audioQuality": { "rating": 3, "weight": 1 },
-    "videoQuality": { "rating": 4, "weight": 1 },
-    "urls": "https://archive.org/details/ucberkeley_webcast_itunesu_438309009/01.+2011-01-24+-+Lecture+1.mp4"
+    "audioQuality": {
+        "rating": 3,
+        "weight": 1,
+        "spread": 0
+    },
+    "videoQuality": {
+        "rating": 4,
+        "weight": 1,
+        "spread": 0
+    },
+    "urls": [
+        "https://archive.org/details/ucberkeley_webcast_itunesu_438309009/01.+2011-01-24+-+Lecture+1.mp4"
+    ]
 }
