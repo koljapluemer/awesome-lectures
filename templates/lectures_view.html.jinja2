@@ -116,6 +116,21 @@
     {{ rating_bar("Worth watching without video", lecture.worthWatchingWithoutVideo, "worthWatchingWithoutVideo") }}
   </div>
 
+  <dialog id="learning-modal" class="al-modal">
+    <h3>Suggest a learning</h3>
+    <p class="text-sm text-muted" style="margin-bottom:0.5rem;">Watch this if you want to…</p>
+    <input type="text" id="learning-input" class="al-input" placeholder="…understand how card games are designed" autocomplete="off">
+    <div class="modal-actions">
+      <button type="button" id="learning-cancel">Cancel</button>
+      <button type="button" id="learning-submit" data-primary>Submit</button>
+    </div>
+  </dialog>
+
+  <div class="flex items-center justify-between mt-lg mb-sm">
+    <h2 class="text-lg font-bold">Watch this if you want to…</h2>
+    <button class="tag-pill-btn" id="suggest-learning-btn"><i data-lucide="plus" width="12" height="12"></i> suggest</button>
+  </div>
+
   {% if lecture.learnings %}
   {% macro learning_card(item) %}
   {% set color = item.key | hue_from_str %}
@@ -141,7 +156,6 @@
   {% set all_items = lecture.learnings | sorted_learnings %}
   {% set above = all_items | selectattr('rating', 'ge', 5) | list %}
   {% set below = all_items | rejectattr('rating', 'ge', 5) | list %}
-  <h2 class="text-lg font-bold mt-lg mb-sm">Watch this if you want to...</h2>
   <div class="flex flex-col gap-sm">
     {% for item in above %}{{ learning_card(item) }}{% endfor %}
     {% if below %}

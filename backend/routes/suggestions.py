@@ -22,6 +22,25 @@ def suggest_lecture():
     return jsonify({"status": "ok"}), 201
 
 
+@bp.post("/learnings/<slug>")
+def suggest_learning(slug):
+    """Suggest a new learning outcome."""
+    if not g.fingerprint:
+        return jsonify({"error": "missing fingerprint"}), 400
+    data = request.get_json(silent=True) or {}
+    learning = (data.get("learning") or "").strip()
+    if not learning:
+        return jsonify({"error": "learning required"}), 400
+
+    db = get_db()
+    db.execute(
+        "INSERT INTO learning_suggestions (fingerprint_id, slug, learning) VALUES (?, ?, ?)",
+        (g.fingerprint, slug, learning),
+    )
+    db.commit()
+    return jsonify({"status": "ok"}), 201
+
+
 @bp.post("/topics/<slug>")
 def suggest_topic(slug):
     """Single tag addition."""

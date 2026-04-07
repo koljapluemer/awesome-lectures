@@ -42,6 +42,15 @@ CREATE TABLE IF NOT EXISTS rating_votes (
   created_at     TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
+-- User-suggested learning outcomes for existing lectures
+CREATE TABLE IF NOT EXISTS learning_suggestions (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  fingerprint_id TEXT    NOT NULL REFERENCES fingerprints(id),
+  slug           TEXT    NOT NULL,
+  learning       TEXT    NOT NULL,
+  created_at     TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
 -- User-suggested tag additions and removals for existing lectures
 CREATE TABLE IF NOT EXISTS topic_suggestions (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,

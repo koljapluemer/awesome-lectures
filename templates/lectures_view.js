@@ -84,6 +84,28 @@
       .catch(() => toast('Could not submit suggestions', true));
   });
 
+  // — suggest a learning —
+  const learningModal = document.getElementById('learning-modal');
+  document.getElementById('suggest-learning-btn').addEventListener('click', () => {
+    document.getElementById('learning-input').value = '';
+    learningModal.showModal();
+  });
+  document.getElementById('learning-cancel').addEventListener('click', () => learningModal.close());
+  learningModal.addEventListener('click', e => { if (e.target === learningModal) learningModal.close(); });
+  document.getElementById('learning-submit').addEventListener('click', () => {
+    const learning = document.getElementById('learning-input').value.trim();
+    if (!learning) return;
+    learningModal.close();
+    if (AL_API_BASE === null) return;
+    fetch(`${AL_API_BASE}/api/suggestions/learnings/${encodeURIComponent(slug)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-AL-Fingerprint': getFingerprint() },
+      body: JSON.stringify({ learning }),
+    })
+      .then(r => { if (r.ok) toast('Learning suggestion submitted, thanks!'); else throw new Error(); })
+      .catch(() => toast('Could not submit suggestion', true));
+  });
+
   // — vote on ratings —
   const voteModal  = document.getElementById('vote-modal');
   const voteSlider = document.getElementById('vote-slider');
