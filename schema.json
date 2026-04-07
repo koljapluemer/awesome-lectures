@@ -100,7 +100,7 @@
       "description": "Where on the beginner–expert spectrum the content sits (0–10 scale). Low = very beginner-friendly, high = expert-level.",
       "$ref": "#/definitions/scaleRating"
     },
-    "worthWatchingWithoutVideo": {
+    "worthListeningToWithoutVideo": {
       "description": "How worthwhile the lecture is as audio-only (0–10 scale).",
       "$ref": "#/definitions/scaleRating"
     }

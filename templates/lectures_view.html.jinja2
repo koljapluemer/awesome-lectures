@@ -112,8 +112,8 @@
   <div class="card flex flex-col gap-sm">
     {{ rating_bar("Audio quality", lecture.audioQuality, "audioQuality") }}
     {{ rating_bar("Video quality", lecture.videoQuality, "videoQuality") }}
-    {{ rating_bar("Beginner–expert level", lecture.beginnerExpertSpectrum, "beginnerExpertSpectrum") }}
-    {{ rating_bar("Worth watching without video", lecture.worthWatchingWithoutVideo, "worthWatchingWithoutVideo") }}
+    {{ rating_bar("How much expertise do you need to understand this talk?", lecture.beginnerExpertSpectrum, "beginnerExpertSpectrum") }}
+    {{ rating_bar("Worth listening to without the video?", lecture.worthListeningToWithoutVideo, "worthListeningToWithoutVideo") }}
   </div>
 
   <dialog id="learning-modal" class="al-modal">

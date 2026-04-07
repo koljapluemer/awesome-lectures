@@ -29,7 +29,7 @@ Create `data/<slug>.json`:
 }
 ```
 
-Optional fields: `learnings` (list of `{"topic": score}` dicts), `liked` (`[score, count]`), `beginnerExpertSpectrum` (`[score, count]`), `worthWatchingWithoutVideo` (int/10).
+Optional fields: `learnings` (list of `{"topic": score}` dicts), `liked` (`[score, count]`), `beginnerExpertSpectrum` (`[score, count]`), `worthListeningToWithoutVideo` (int/10).
 
 The `embed` field (bool) is auto-set on first build via YouTube's oEmbed API and written back to the JSON. Remove it to re-check.
 

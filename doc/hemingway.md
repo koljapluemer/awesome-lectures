@@ -1,0 +1,1 @@
+Move the `Submit` form to new flask paradigm.
