@@ -1,9 +1,24 @@
 {% extends "base.html.jinja2" %}
+{% from "_lecture_card.html.jinja2" import lecture_card %}
 
 {% block content %}
-<div class="container" style="min-height:80vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-  <h1 class="text-2xl font-bold mb-sm">Awesome Lectures</h1>
-  <p class="text-md text-muted mb-lg">A curated collection of talks worth watching.</p>
-  <a href="{{ root }}lectures/random/" class="text-lg">Browse lectures &rarr;</a>
+<div class="container py-lg">
+  <div style="min-height:30vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding: 3rem 0 2rem;">
+    <h1 class="text-2xl font-bold mb-sm">Awesome Lectures</h1>
+    <p class="text-md text-muted mb-lg">A curated collection of talks worth watching.</p>
+    <a href="{{ root }}lectures/random/" class="text-lg">Browse all lectures &rarr;</a>
+  </div>
+
+  {% if featured %}
+  <div class="mb-sm" style="display:flex; align-items:baseline; justify-content:space-between;">
+    <h2 class="font-bold text-lg">Featured lectures</h2>
+    <a href="{{ root }}lectures/random/" class="text-sm">See all &rarr;</a>
+  </div>
+  <div class="flex flex-col gap-md">
+    {% for lecture in featured %}
+    {{ lecture_card(lecture, root) }}
+    {% endfor %}
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

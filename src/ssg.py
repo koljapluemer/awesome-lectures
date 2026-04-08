@@ -207,9 +207,14 @@ def build():
 
     common = {"api_base": api_base}
 
-    # Landing page
+    # Landing page — pick 3 random lectures that have ≥2 learnings
+    def _learning_count(lec):
+        return sum(len(block) for block in (lec.get("learnings") or []))
+
+    eligible = [l for l in lectures if _learning_count(l) >= 2]
+    featured = random.sample(eligible, min(3, len(eligible)))
     tpl = env.get_template("index.html.jinja2")
-    (PUBLIC_DIR / "index.html").write_text(tpl.render(root="", **common))
+    (PUBLIC_DIR / "index.html").write_text(tpl.render(root="", featured=featured, **common))
 
     # Search page
     search_dir = PUBLIC_DIR / "search"
