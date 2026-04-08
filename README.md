@@ -57,3 +57,5 @@ Netlify. Config in `netlify.toml`. Set `STATICFORMS_KEY` and `SITE_URL` in the N
 - <https://library.wabash.edu/av/open>
 - <https://www.youtube.com/watch?v=F-OxHWWg59o&list=PLoROMvodv4rMyupDF2O00r19JsmolyXdD>
 - <https://video.tu-clausthal.de/uebersicht/lehre/vorlesungsaufzeichnungen.html>
+
+- <https://old.reddit.com/r/lectures/>, especially <https://old.reddit.com/r/lectures/comments/9ykg99/announcement_new_submission_rule_going_forward/>

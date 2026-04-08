@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS lecture_suggestions (
   url            TEXT    NOT NULL,
   title          TEXT,
   note           TEXT,
+  data           TEXT,
   created_at     TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 

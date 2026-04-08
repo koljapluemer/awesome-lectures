@@ -1,3 +1,5 @@
+import json
+
 from flask import Blueprint, g, jsonify, request
 from db import get_db
 
@@ -13,10 +15,11 @@ def suggest_lecture():
     if not url:
         return jsonify({"error": "url required"}), 400
 
+    extra_fields = {k: v for k, v in data.items() if k not in ("url", "title")}
     db = get_db()
     db.execute(
-        "INSERT INTO lecture_suggestions (fingerprint_id, url, title, note) VALUES (?, ?, ?, ?)",
-        (g.fingerprint, url, data.get("title"), data.get("note")),
+        "INSERT INTO lecture_suggestions (fingerprint_id, url, title, note, data) VALUES (?, ?, ?, ?, ?)",
+        (g.fingerprint, url, data.get("title"), data.get("extra"), json.dumps(extra_fields) if extra_fields else None),
     )
     db.commit()
     return jsonify({"status": "ok"}), 201
