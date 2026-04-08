@@ -80,7 +80,7 @@
   </dialog>
 
   {% set all_tags = (lecture.topics or []) + (lecture.tags or []) %}
-  <script>window.AL_VIEW = { slug: {{ lecture.slug | tojson }}, tags: { { all_tags | tojson } } };</script>
+  <script>window.AL_VIEW = { slug: {{ lecture.slug | tojson }}, tags: {{ all_tags | tojson }} };</script>
 
 
 
