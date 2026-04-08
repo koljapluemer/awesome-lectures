@@ -308,39 +308,50 @@ window.AL_EDIT = {
     const urls = [...urlsList.querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
     if (!urls.length) { toast('Please enter at least one URL', true); return; }
 
+    // Helper: only include a field if it differs from the original
     const payload = { slug: d.slug, url: urls[0] };
-    if (urls.length > 1) payload.urls = urls;
+
+    const arrEq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+    if (!arrEq(urls, d.urls)) { payload.urls = urls; }
 
     const title = document.getElementById('title').value.trim();
-    if (title) payload.title = title;
+    if (title !== (d.title || '')) payload.title = title;
 
     const speakers = document.getElementById('speakers').value.split(',').map(s => s.trim()).filter(Boolean);
-    if (speakers.length) payload.speakers = speakers;
+    if (!arrEq(speakers, d.speakers ? d.speakers.split(',').map(s => s.trim()).filter(Boolean) : []))
+      payload.speakers = speakers;
 
     const year = parseInt(document.getElementById('year').value, 10);
-    if (!isNaN(year)) payload.year = year;
+    if (!isNaN(year) && year !== (d.year || null)) payload.year = year;
 
     const extra = document.getElementById('extra').value.trim();
-    if (extra) payload.extra = extra;
+    if (extra !== (d.extra || '')) payload.extra = extra;
 
     const startsAt = parseInt(document.getElementById('startsAt').value, 10);
-    if (!isNaN(startsAt) && startsAt > 0) payload.startsAt = startsAt;
+    if (!isNaN(startsAt) && startsAt !== (d.startsAt || null)) payload.startsAt = startsAt;
 
-    if (document.getElementById('embed').checked) payload.embed = true;
+    const embed = document.getElementById('embed').checked;
+    if (embed !== (d.embed || false)) payload.embed = embed;
 
     const topics = document.getElementById('topics').value.split(',').map(s => s.trim()).filter(Boolean);
-    if (topics.length) payload.topics = topics;
+    if (!arrEq(topics, d.topics ? d.topics.split(',').map(s => s.trim()).filter(Boolean) : []))
+      payload.topics = topics;
 
     const tags = document.getElementById('tags').value.split(',').map(s => s.trim()).filter(Boolean);
-    if (tags.length) payload.tags = tags;
+    if (!arrEq(tags, d.tags ? d.tags.split(',').map(s => s.trim()).filter(Boolean) : []))
+      payload.tags = tags;
 
     const learnings = [...learningsList.querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
-    if (learnings.length) payload.learnings = learnings;
+    if (!arrEq(learnings, d.learnings)) payload.learnings = learnings;
 
     ['audioQuality', 'videoQuality', 'beginnerExpertSpectrum', 'worthListeningToWithoutVideo'].forEach(id => {
-      if (document.getElementById(id + '-on').checked)
-        payload[id] = parseFloat(document.getElementById(id).value);
+      const checked = document.getElementById(id + '-on').checked;
+      const val = checked ? parseFloat(document.getElementById(id).value) : null;
+      if (val !== (d[id] ?? null)) payload[id] = val;
     });
+
+    if (Object.keys(payload).length <= 2) { toast('No changes detected', true); return; }
 
     if (AL_API_BASE === null) {
       toast('Submissions are disabled in preview mode', true);
