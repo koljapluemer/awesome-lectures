@@ -246,6 +246,15 @@ def build():
     for lecture in lectures:
         (lectures_dir / f"{lecture['slug']}.html").write_text(view_tpl.render(lecture=lecture, root="../", **common))
 
+    # Per-lecture suggest-edit pages
+    edit_tpl = env.get_template("suggest_edit.html.jinja2")
+    edit_root = PUBLIC_DIR / "suggest-edit"
+    edit_root.mkdir()
+    for lecture in lectures:
+        slug_dir = edit_root / lecture["slug"]
+        slug_dir.mkdir()
+        (slug_dir / "index.html").write_text(edit_tpl.render(lecture=lecture, root="../../", **common))
+
     print(f"Built {len(lectures)} lectures -> {PUBLIC_DIR}")
 
     result = subprocess.run(["npx", "--yes", "pagefind", "--site", str(PUBLIC_DIR)])

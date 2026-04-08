@@ -4,10 +4,20 @@
 
 {% block content %}
 <div class="container py-lg">
-  <div class="flex items-center gap-md mt-md mb-sm">
-    <h1 class="text-2xl font-bold" style="flex:1;">{{ lecture.title }}</h1>
-    <button class="icon-btn" data-slug="{{ lecture.slug }}" data-action="like" aria-label="Like"><i data-lucide="heart" width="20" height="20"></i></button>
-    <button class="icon-btn" data-slug="{{ lecture.slug }}" data-action="seen" aria-label="Mark as seen"><i data-lucide="eye" width="20" height="20"></i></button>
+  <div class="mt-md mb-sm">
+    <div class="flex items-center gap-md mb-xs">
+      <a class="tag-pill-btn" href="{{ root }}suggest-edit/{{ lecture.slug }}/" style="text-decoration:none;"
+        aria-label="Suggest an edit">
+        <i data-lucide="file-pen" width="12" height="12"></i> suggest edits
+      </a>
+    </div>
+    <div class="flex items-center gap-md">
+      <h1 class="text-2xl font-bold" style="flex:1;">{{ lecture.title }}</h1>
+      <button class="icon-btn" data-slug="{{ lecture.slug }}" data-action="like" aria-label="Like"><i
+          data-lucide="heart" width="20" height="20"></i></button>
+      <button class="icon-btn" data-slug="{{ lecture.slug }}" data-action="seen" aria-label="Mark as seen"><i
+          data-lucide="eye" width="20" height="20"></i></button>
+    </div>
   </div>
 
   {% if lecture.speakers %}
@@ -24,6 +34,7 @@
     <button class="tag-pill-btn" id="edit-tags-btn" aria-label="Edit tags">
       <i data-lucide="pencil" width="12" height="12"></i> edit tags
     </button>
+
   </div>
 
   <dialog id="tag-modal" class="al-modal">
@@ -39,7 +50,8 @@
     <h3>Edit tags</h3>
     <div class="edit-chips" id="edit-tags-chips"></div>
     <div style="display:flex;gap:0.5rem;">
-      <input type="text" id="edit-tags-input" class="al-input" style="margin-bottom:0;flex:1;" placeholder="Add a tag…" autocomplete="off">
+      <input type="text" id="edit-tags-input" class="al-input" style="margin-bottom:0;flex:1;" placeholder="Add a tag…"
+        autocomplete="off">
       <button type="button" id="edit-tags-add" class="modal-btn">Add</button>
     </div>
     <div class="modal-actions" style="margin-top:1rem;">
@@ -50,10 +62,15 @@
 
   <dialog id="vote-modal" class="al-modal">
     <h3 id="vote-modal-title">Rate</h3>
-    <input type="range" id="vote-slider" min="0" max="10" step="0.5" value="5" style="width:100%;margin-bottom:0.25rem;accent-color:var(--accent);">
-    <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-bottom:0.75rem;"><span>0</span><span>5</span><span>10</span></div>
+    <input type="range" id="vote-slider" min="0" max="10" step="0.5" value="5"
+      style="width:100%;margin-bottom:0.25rem;accent-color:var(--accent);">
+    <div
+      style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-bottom:0.75rem;">
+      <span>0</span><span>5</span><span>10</span>
+    </div>
     <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;">
-      <input type="number" id="vote-number" min="0" max="10" step="0.5" value="5" class="al-input" style="margin-bottom:0;width:5rem;">
+      <input type="number" id="vote-number" min="0" max="10" step="0.5" value="5" class="al-input"
+        style="margin-bottom:0;width:5rem;">
       <span class="text-sm text-muted">/ 10</span>
     </div>
     <div class="modal-actions">
@@ -63,18 +80,20 @@
   </dialog>
 
   {% set all_tags = (lecture.topics or []) + (lecture.tags or []) %}
-  <script>window.AL_VIEW = { slug: {{ lecture.slug | tojson }}, tags: {{ all_tags | tojson }} };</script>
+  <script>window.AL_VIEW = { slug: {{ lecture.slug | tojson }}, tags: { { all_tags | tojson } } };</script>
+
+
 
   {% if lecture.video_id and lecture.embed %}
   <div class="video-wrapper mb-lg">
-    <iframe src="https://www.youtube.com/embed/{{ lecture.video_id }}"
-            allowfullscreen
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+    <iframe src="https://www.youtube.com/embed/{{ lecture.video_id }}" allowfullscreen
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
     </iframe>
   </div>
   {% elif lecture.thumbnail and lecture.urls %}
   <a href="{{ lecture.urls[0] }}" target="_blank" rel="noopener" class="mb-lg" style="display:inline-block;">
-    <img src="{{ root }}{{ lecture.thumbnail }}" alt="{{ lecture.title }}" style="border-radius:0.5rem; max-width:400px; width:100%; display:block;">
+    <img src="{{ root }}{{ lecture.thumbnail }}" alt="{{ lecture.title }}"
+      style="border-radius:0.5rem; max-width:400px; width:100%; display:block;">
   </a>
   {% endif %}
   {% if lecture.urls %}
@@ -92,34 +111,44 @@
       {% if item %}
       {% set color = "#3dd93d" %}
       {% set spread = [item.spread | default(0), 0.1] | max %}
-      {% set l = ([item.rating - spread, 0]  | max) * 10 %}
+      {% set l = ([item.rating - spread, 0] | max) * 10 %}
       {% set r = ([item.rating + spread, 10] | min) * 10 %}
       {% set m = item.rating * 10 %}
       {% set c_l = color | mix_white(l / 100) %}
       {% set c_r = color | mix_white(r / 100) %}
-      <div style="flex:1;position:relative;height:16px;border-radius:4px;overflow:hidden;background:linear-gradient(to right,#d4d4d4 0%,#d4d4d4 {{ l }}%,{{ c_l }} {{ l }}%,{{ c_r }} {{ r }}%,#d4d4d4 {{ r }}%,#d4d4d4 100%);">
-        <div style="position:absolute;left:{{ m }}%;top:0;bottom:0;width:2px;background:#111;transform:translateX(-50%);"></div>
+      <div
+        style="flex:1;position:relative;height:16px;border-radius:4px;overflow:hidden;background:linear-gradient(to right,#d4d4d4 0%,#d4d4d4 {{ l }}%,{{ c_l }} {{ l }}%,{{ c_r }} {{ r }}%,#d4d4d4 {{ r }}%,#d4d4d4 100%);">
+        <div
+          style="position:absolute;left:{{ m }}%;top:0;bottom:0;width:2px;background:#111;transform:translateX(-50%);">
+        </div>
       </div>
-      <span style="font-weight:700;font-size:0.95rem;min-width:2.8rem;text-align:center;flex-shrink:0;">{{ item.rating | round(1) }}</span>
+      <span style="font-weight:700;font-size:0.95rem;min-width:2.8rem;text-align:center;flex-shrink:0;">{{ item.rating |
+        round(1) }}</span>
       {% else %}
       <div style="flex:1;height:16px;border-radius:4px;border:1px dashed #bbb;"></div>
-      <span style="font-weight:700;font-size:0.95rem;min-width:2.8rem;text-align:center;flex-shrink:0;color:var(--text-muted);">?</span>
+      <span
+        style="font-weight:700;font-size:0.95rem;min-width:2.8rem;text-align:center;flex-shrink:0;color:var(--text-muted);">?</span>
       {% endif %}
-      <button class="vote-btn" data-field="{{ field }}" data-label="{{ label }}" data-current="{{ item.rating if item else 5 }}" aria-label="Rate {{ label }}"><i data-lucide="star" width="14" height="14"></i></button>
+      <button class="vote-btn" data-field="{{ field }}" data-label="{{ label }}"
+        data-current="{{ item.rating if item else 5 }}" aria-label="Rate {{ label }}"><i data-lucide="star" width="14"
+          height="14"></i></button>
     </div>
   </div>
   {% endmacro %}
   <div class="card flex flex-col gap-sm">
     {{ rating_bar("Audio quality", lecture.audioQuality, "audioQuality") }}
     {{ rating_bar("Video quality", lecture.videoQuality, "videoQuality") }}
-    {{ rating_bar("How much expertise do you need to understand this talk?", lecture.beginnerExpertSpectrum, "beginnerExpertSpectrum") }}
-    {{ rating_bar("Worth listening to without the video?", lecture.worthListeningToWithoutVideo, "worthListeningToWithoutVideo") }}
+    {{ rating_bar("How much expertise do you need to understand this talk?", lecture.beginnerExpertSpectrum,
+    "beginnerExpertSpectrum") }}
+    {{ rating_bar("Worth listening to without the video?", lecture.worthListeningToWithoutVideo,
+    "worthListeningToWithoutVideo") }}
   </div>
 
   <dialog id="learning-modal" class="al-modal">
     <h3>Suggest a learning</h3>
     <p class="text-sm text-muted" style="margin-bottom:0.5rem;">Watch this if you want to…</p>
-    <input type="text" id="learning-input" class="al-input" placeholder="…understand how card games are designed" autocomplete="off">
+    <input type="text" id="learning-input" class="al-input" placeholder="…understand how card games are designed"
+      autocomplete="off">
     <div class="modal-actions">
       <button type="button" id="learning-cancel">Cancel</button>
       <button type="button" id="learning-submit" data-primary>Submit</button>
@@ -128,14 +157,15 @@
 
   <div class="flex items-center justify-between mt-lg mb-sm">
     <h2 class="text-lg font-bold">Watch this if you want to…</h2>
-    <button class="tag-pill-btn" id="suggest-learning-btn"><i data-lucide="plus" width="12" height="12"></i> suggest</button>
+    <button class="tag-pill-btn" id="suggest-learning-btn"><i data-lucide="plus" width="12" height="12"></i>
+      suggest</button>
   </div>
 
   {% if lecture.learnings %}
   {% macro learning_card(item) %}
   {% set color = item.key | hue_from_str %}
   {% set spread = [item.spread | default(0), 0.1] | max %}
-  {% set l = ([item.rating - spread, 0]  | max) * 10 %}
+  {% set l = ([item.rating - spread, 0] | max) * 10 %}
   {% set r = ([item.rating + spread, 10] | min) * 10 %}
   {% set m = item.rating * 10 %}
   {% set c_l = color | mix_white(l / 100) %}
@@ -143,13 +173,19 @@
   <div class="card" style="padding:0.5rem 0.75rem;display:flex;align-items:stretch;gap:0.75rem;">
     <div style="flex:1;">
       <div class="text-sm font-bold mb-xs">{{ item.key }}</div>
-      <div style="position:relative;height:16px;border-radius:4px;overflow:hidden;background:linear-gradient(to right,#d4d4d4 0%,#d4d4d4 {{ l }}%,{{ c_l }} {{ l }}%,{{ c_r }} {{ r }}%,#d4d4d4 {{ r }}%,#d4d4d4 100%);">
-        <div style="position:absolute;left:{{ m }}%;top:0;bottom:0;width:2px;background:#111;transform:translateX(-50%);"></div>
+      <div
+        style="position:relative;height:16px;border-radius:4px;overflow:hidden;background:linear-gradient(to right,#d4d4d4 0%,#d4d4d4 {{ l }}%,{{ c_l }} {{ l }}%,{{ c_r }} {{ r }}%,#d4d4d4 {{ r }}%,#d4d4d4 100%);">
+        <div
+          style="position:absolute;left:{{ m }}%;top:0;bottom:0;width:2px;background:#111;transform:translateX(-50%);">
+        </div>
       </div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.25rem;padding-left:0.75rem;border-left:1px solid var(--border);flex-shrink:0;min-width:2.8rem;">
+    <div
+      style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.25rem;padding-left:0.75rem;border-left:1px solid var(--border);flex-shrink:0;min-width:2.8rem;">
       <span style="font-weight:700;font-size:0.95rem;">{{ item.rating | round(1) }}</span>
-      <button class="vote-btn" data-field="learnings:{{ item.key }}" data-label="{{ item.key }}" data-current="{{ item.rating }}" aria-label="Rate {{ item.key }}"><i data-lucide="star" width="12" height="12"></i></button>
+      <button class="vote-btn" data-field="learnings:{{ item.key }}" data-label="{{ item.key }}"
+        data-current="{{ item.rating }}" aria-label="Rate {{ item.key }}"><i data-lucide="star" width="12"
+          height="12"></i></button>
     </div>
   </div>
   {% endmacro %}
@@ -160,7 +196,8 @@
     {% for item in above %}{{ learning_card(item) }}{% endfor %}
     {% if below %}
     <details>
-      <summary class="text-sm text-muted" style="cursor:pointer;user-select:none;">{{ below | length }} lower-rated {{ 'learning' if below | length == 1 else 'learnings' }}</summary>
+      <summary class="text-sm text-muted" style="cursor:pointer;user-select:none;">{{ below | length }} lower-rated {{
+        'learning' if below | length == 1 else 'learnings' }}</summary>
       <div class="flex flex-col gap-sm mt-sm">
         {% for item in below %}{{ learning_card(item) }}{% endfor %}
       </div>
