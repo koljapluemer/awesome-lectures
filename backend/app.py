@@ -1,8 +1,12 @@
+from dotenv import load_dotenv
 from flask import Flask, g, request
 from flask_cors import CORS
 
+load_dotenv()
+
 from config import Config
 from db import close_db, init_db, get_db
+from routes.admin import bp as admin_bp
 from routes.interactions import bp as interactions_bp
 from routes.ratings import bp as ratings_bp
 from routes.suggestions import bp as suggestions_bp
@@ -17,6 +21,7 @@ def create_app(config=Config):
     CORS(app, origins=app.config["ALLOWED_ORIGINS"], allow_headers=[FP_HEADER, "Content-Type"])
     app.teardown_appcontext(close_db)
 
+    app.register_blueprint(admin_bp)
     app.register_blueprint(interactions_bp)
     app.register_blueprint(ratings_bp)
     app.register_blueprint(suggestions_bp)

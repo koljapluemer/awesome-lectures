@@ -2,3 +2,5 @@ public/
 src/.venv/
 src/uv.lock
 __pycache__/
+backend/.env
+*.db
