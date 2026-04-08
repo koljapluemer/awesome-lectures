@@ -36,6 +36,26 @@ def _mix_white(color_hex: str, t: float) -> str:
     return f"#{int(255 + (r - 255) * t):02x}{int(255 + (g - 255) * t):02x}{int(255 + (b - 255) * t):02x}"
 
 
+def _add_prior_vote(item: dict) -> None:
+    """Add one phantom vote of 5 to a scaleRating dict in-place (display only).
+
+    Recovers sum_ratings and sum_squares from the stored Bayesian mean/spread,
+    adds a single vote of 5, then recomputes rating and spread.
+    Only applied when weight > 0 (real votes exist).
+    """
+    w = item.get("weight", 0)
+    if w == 0:
+        return
+    W = w + 10  # effective weight including the baked-in prior
+    r = item["rating"]
+    s = item.get("spread", 0.0)
+    new_W = W + 1
+    new_r = (r * W + 5) / new_W
+    new_var = ((s ** 2 + r ** 2) * W + 25) / new_W - new_r ** 2
+    item["rating"] = new_r
+    item["spread"] = math.sqrt(max(0.0, new_var))
+
+
 def _sorted_learnings(learnings: list) -> list:
     """Flatten the learnings list-of-dicts and sort by Bayesian rating (desc).
 
@@ -123,6 +143,15 @@ def load_lectures() -> list[dict]:
         data["slug"] = path.stem
         data["video_id"] = video_id
         data["date_added"] = git_date_added(path)
+
+        # Add one phantom vote of 5 to all scaleRating fields for display.
+        for field in ("audioQuality", "videoQuality", "beginnerExpertSpectrum", "worthListeningToWithoutVideo"):
+            if data.get(field):
+                _add_prior_vote(data[field])
+        for block in (data.get("learnings") or []):
+            for val in block.values():
+                _add_prior_vote(val)
+
         lectures.append(data)
     return lectures
 
