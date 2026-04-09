@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
-# Run on the droplet to pull latest code and restart the service.
+# Deploy latest code. Run as root on the droplet.
+# See deploy/DEPLOY.md for the full guide.
 set -euo pipefail
 
-cd /srv/awesome-lectures
+DEPLOY_DIR="/srv/awesome-lectures"
+APP_USER="al"
+
+echo "==> Pulling latest code"
+cd "$DEPLOY_DIR"
 git pull
 
-cd backend
-sudo -u al /home/al/.local/bin/uv sync
+echo "==> Syncing dependencies"
+cd "$DEPLOY_DIR/backend"
+sudo -u "$APP_USER" /home/"$APP_USER"/.local/bin/uv sync
 
+echo "==> Restarting service"
 systemctl restart al-backend
-echo ">>> Updated and restarted"
+systemctl status al-backend --no-pager

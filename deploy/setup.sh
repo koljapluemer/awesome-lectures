@@ -1,41 +1,61 @@
 #!/usr/bin/env bash
-# Run once on a fresh Ubuntu droplet as root.
+# Initial server setup. Run once as root on a fresh Ubuntu 22.04+ droplet.
+# See deploy/DEPLOY.md for the full guide.
 set -euo pipefail
 
-# Create dedicated user
-useradd -r -s /bin/bash -m al
+REPO="git@github.com:koljapluemer/awesome-lectures.git"
+DEPLOY_DIR="/srv/awesome-lectures"
+APP_USER="al"
 
-# Install uv
-curl -LsSf https://astral.sh/uv/install.sh | HOME=/home/al sudo -u al bash -s
+echo "==> Creating system user '$APP_USER'"
+useradd --system --shell /bin/bash --create-home "$APP_USER"
 
-# Clone repo
-git clone https://github.com/koljapluemer/awesome-lectures /srv/awesome-lectures
-chown -R al:al /srv/awesome-lectures
+echo "==> Installing uv"
+curl -LsSf https://astral.sh/uv/install.sh | HOME="/home/$APP_USER" sudo -u "$APP_USER" bash -s
 
-# Install Python deps (includes gunicorn)
-cd /srv/awesome-lectures/backend
-sudo -u al /home/al/.local/bin/uv add gunicorn
-sudo -u al /home/al/.local/bin/uv sync
+echo "==> Cloning repository"
+git clone "$REPO" "$DEPLOY_DIR"
+chown -R "$APP_USER:$APP_USER" "$DEPLOY_DIR"
 
-# Create .env (fill in values after running this script)
-if [ ! -f /srv/awesome-lectures/backend/.env ]; then
-  cp /srv/awesome-lectures/backend/.env.example /srv/awesome-lectures/backend/.env 2>/dev/null || \
-  cat > /srv/awesome-lectures/backend/.env <<'EOF'
-SECRET_KEY=change-me
-ALLOWED_ORIGINS=https://yoursite.netlify.app
+echo "==> Installing Python dependencies"
+cd "$DEPLOY_DIR/backend"
+sudo -u "$APP_USER" /home/"$APP_USER"/.local/bin/uv sync
+
+echo "==> Creating .env"
+cat > "$DEPLOY_DIR/backend/.env" <<'EOF'
+# Generate a strong random value: python3 -c "import secrets; print(secrets.token_hex(32))"
+SECRET_KEY=
+
+# Your Netlify frontend URL, e.g. https://awesome-lectures.netlify.app
+ALLOWED_ORIGINS=
+
+# GitHub OAuth app credentials (github.com/settings/developers)
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
-ALLOWED_MODERATORS=
-EOF
-  echo ">>> Edit /srv/awesome-lectures/backend/.env before starting the service"
-fi
 
-# Install and enable systemd service
-cp /srv/awesome-lectures/deploy/al-backend.service /etc/systemd/system/
+# The repo that holds lecture data, e.g. koljapluemer/awesome-lectures
+GITHUB_REPO=
+GITHUB_BRANCH=main
+
+# Comma-separated GitHub usernames that can access /admin
+ALLOWED_MODERATORS=
+
+# Path to SQLite database file
+DATABASE=/srv/awesome-lectures/backend/lectures.db
+EOF
+chown "$APP_USER:$APP_USER" "$DEPLOY_DIR/backend/.env"
+chmod 600 "$DEPLOY_DIR/backend/.env"
+
+echo "==> Installing systemd service"
+cp "$DEPLOY_DIR/deploy/al-backend.service" /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable al-backend
 
-# Open port 5000
+echo "==> Configuring firewall"
+ufw allow OpenSSH
 ufw allow 5000/tcp
+ufw --force enable
 
-echo ">>> Setup done. Fill in .env then: systemctl start al-backend"
+echo ""
+echo "==> Done. Fill in $DEPLOY_DIR/backend/.env, then run:"
+echo "    systemctl start al-backend"
