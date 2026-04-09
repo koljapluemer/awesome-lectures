@@ -2,15 +2,19 @@ import json
 
 from flask import Blueprint, g, jsonify, request
 from db import get_db
+from limiter import limiter
 
 bp = Blueprint("suggestions", __name__, url_prefix="/api/suggestions")
 
 
 @bp.post("/lectures")
+@limiter.limit("100 per day")
 def suggest_lecture():
     if not g.fingerprint:
         return jsonify({"error": "missing fingerprint"}), 400
     data = request.get_json(silent=True) or {}
+    if data.get("hp"):
+        return jsonify({"status": "ok"}), 201
     url = (data.get("url") or "").strip()
     if not url:
         return jsonify({"error": "url required"}), 400
@@ -26,11 +30,14 @@ def suggest_lecture():
 
 
 @bp.post("/learnings/<slug>")
+@limiter.limit("200 per hour")
 def suggest_learning(slug):
     """Suggest a new learning outcome."""
     if not g.fingerprint:
         return jsonify({"error": "missing fingerprint"}), 400
     data = request.get_json(silent=True) or {}
+    if data.get("hp"):
+        return jsonify({"status": "ok"}), 201
     learning = (data.get("learning") or "").strip()
     if not learning:
         return jsonify({"error": "learning required"}), 400
@@ -45,11 +52,14 @@ def suggest_learning(slug):
 
 
 @bp.post("/topics/<slug>")
+@limiter.limit("200 per hour")
 def suggest_topic(slug):
     """Single tag addition."""
     if not g.fingerprint:
         return jsonify({"error": "missing fingerprint"}), 400
     data = request.get_json(silent=True) or {}
+    if data.get("hp"):
+        return jsonify({"status": "ok"}), 201
     topic = (data.get("topic") or "").strip()
     if not topic:
         return jsonify({"error": "topic required"}), 400
@@ -64,11 +74,14 @@ def suggest_topic(slug):
 
 
 @bp.post("/tags/<slug>")
+@limiter.limit("200 per hour")
 def suggest_tags(slug):
     """Batch tag additions and/or removals."""
     if not g.fingerprint:
         return jsonify({"error": "missing fingerprint"}), 400
     data = request.get_json(silent=True) or {}
+    if data.get("hp"):
+        return jsonify({"status": "ok"}), 201
     add    = [t.strip() for t in data.get("add",    []) if str(t).strip()]
     remove = [t.strip() for t in data.get("remove", []) if str(t).strip()]
     if not add and not remove:

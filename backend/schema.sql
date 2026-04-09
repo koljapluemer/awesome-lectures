@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS interaction_counts (
   slug       TEXT    NOT NULL,
   date       TEXT    NOT NULL,  -- YYYY-MM-DD
   likes      INTEGER NOT NULL DEFAULT 0,
-  seen       INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (slug, date)
 );
 
@@ -17,7 +16,7 @@ CREATE TABLE IF NOT EXISTS interaction_counts (
 CREATE TABLE IF NOT EXISTS votes (
   fingerprint_id TEXT NOT NULL REFERENCES fingerprints(id),
   slug           TEXT NOT NULL,
-  action         TEXT NOT NULL CHECK(action IN ('like', 'seen')),
+  action         TEXT NOT NULL CHECK(action IN ('like')),
   date           TEXT NOT NULL,
   PRIMARY KEY (fingerprint_id, slug, action, date)
 );

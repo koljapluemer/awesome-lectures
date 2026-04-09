@@ -208,12 +208,14 @@
       </div>
     </details>
 
+    <input name="website" style="display:none" tabindex="-1" autocomplete="off" id="submit-hp">
     <button type="button" class="submit-btn" id="submit-btn">Submit &rarr;</button>
   </div>
 </div>
 
 <script>
 (function () {
+  const formOpenedAt = Date.now();
   // — URL list —
   const urlsList = document.getElementById('urls-list');
   function addUrl(val) {
@@ -293,12 +295,15 @@
       return;
     }
 
+    const hp = document.getElementById('submit-hp').value;
+    if (hp || Date.now() - formOpenedAt < 2000) return;
+
     const btn = document.getElementById('submit-btn');
     btn.disabled = true;
     fetch(`${AL_API_BASE}/api/suggestions/lectures`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-AL-Fingerprint': getFingerprint() },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ ...payload, hp }),
     })
       .then(r => {
         if (r.ok) {

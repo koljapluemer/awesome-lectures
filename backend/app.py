@@ -6,6 +6,7 @@ load_dotenv()
 
 from config import Config
 from db import close_db, init_db, get_db
+from limiter import limiter
 from routes.admin import bp as admin_bp
 from routes.interactions import bp as interactions_bp
 from routes.ratings import bp as ratings_bp
@@ -20,6 +21,7 @@ def create_app(config=Config):
 
     CORS(app, origins=app.config["ALLOWED_ORIGINS"], allow_headers=[FP_HEADER, "Content-Type"])
     app.teardown_appcontext(close_db)
+    limiter.init_app(app)
 
     app.register_blueprint(admin_bp)
     app.register_blueprint(interactions_bp)

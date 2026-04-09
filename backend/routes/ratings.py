@@ -1,10 +1,12 @@
 from flask import Blueprint, g, jsonify, request
 from db import get_db
+from limiter import limiter
 
 bp = Blueprint("ratings", __name__, url_prefix="/api/ratings")
 
 
 @bp.post("/<slug>")
+@limiter.limit("200 per hour")
 def vote(slug):
     if not g.fingerprint:
         return jsonify({"error": "missing fingerprint"}), 400

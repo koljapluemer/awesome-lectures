@@ -3,8 +3,11 @@
 
   // — single tag suggest —
   const modal = document.getElementById('tag-modal');
+  let tagOpenedAt = 0;
   document.getElementById('suggest-tag-btn').addEventListener('click', () => {
     document.getElementById('tag-input').value = '';
+    document.getElementById('tag-hp').value = '';
+    tagOpenedAt = Date.now();
     modal.showModal();
   });
   document.getElementById('tag-cancel').addEventListener('click', () => modal.close());
@@ -12,12 +15,14 @@
   document.getElementById('tag-submit').addEventListener('click', () => {
     const topic = document.getElementById('tag-input').value.trim();
     if (!topic) return;
+    const hp = document.getElementById('tag-hp').value;
     modal.close();
+    if (hp || Date.now() - tagOpenedAt < 2000) return;
     if (AL_API_BASE === null) return;
     fetch(`${AL_API_BASE}/api/suggestions/topics/${encodeURIComponent(slug)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-AL-Fingerprint': getFingerprint() },
-      body: JSON.stringify({ topic }),
+      body: JSON.stringify({ topic, hp }),
     })
       .then(r => { if (r.ok) toast('Tag suggestion submitted, thanks!'); else throw new Error(); })
       .catch(() => toast('Could not submit suggestion', true));
@@ -52,9 +57,12 @@
     });
   }
 
+  let editTagsOpenedAt = 0;
   document.getElementById('edit-tags-btn').addEventListener('click', () => {
     toRemove = new Set(); toAdd = [];
     editInput.value = '';
+    document.getElementById('edit-tags-hp').value = '';
+    editTagsOpenedAt = Date.now();
     renderChips();
     editModal.showModal();
   });
@@ -73,12 +81,14 @@
   editModal.addEventListener('click', e => { if (e.target === editModal) editModal.close(); });
   document.getElementById('edit-tags-submit').addEventListener('click', () => {
     const add = toAdd.slice(), remove = [...toRemove];
+    const hp = document.getElementById('edit-tags-hp').value;
     editModal.close();
+    if (hp || Date.now() - editTagsOpenedAt < 2000) return;
     if (AL_API_BASE === null || (!add.length && !remove.length)) return;
     fetch(`${AL_API_BASE}/api/suggestions/tags/${encodeURIComponent(slug)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-AL-Fingerprint': getFingerprint() },
-      body: JSON.stringify({ add, remove }),
+      body: JSON.stringify({ add, remove, hp }),
     })
       .then(r => { if (r.ok) toast('Tag suggestions submitted, thanks!'); else throw new Error(); })
       .catch(() => toast('Could not submit suggestions', true));
@@ -86,8 +96,11 @@
 
   // — suggest a learning —
   const learningModal = document.getElementById('learning-modal');
+  let learningOpenedAt = 0;
   document.getElementById('suggest-learning-btn').addEventListener('click', () => {
     document.getElementById('learning-input').value = '';
+    document.getElementById('learning-hp').value = '';
+    learningOpenedAt = Date.now();
     learningModal.showModal();
   });
   document.getElementById('learning-cancel').addEventListener('click', () => learningModal.close());
@@ -95,12 +108,14 @@
   document.getElementById('learning-submit').addEventListener('click', () => {
     const learning = document.getElementById('learning-input').value.trim();
     if (!learning) return;
+    const hp = document.getElementById('learning-hp').value;
     learningModal.close();
+    if (hp || Date.now() - learningOpenedAt < 2000) return;
     if (AL_API_BASE === null) return;
     fetch(`${AL_API_BASE}/api/suggestions/learnings/${encodeURIComponent(slug)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-AL-Fingerprint': getFingerprint() },
-      body: JSON.stringify({ learning }),
+      body: JSON.stringify({ learning, hp }),
     })
       .then(r => { if (r.ok) toast('Learning suggestion submitted, thanks!'); else throw new Error(); })
       .catch(() => toast('Could not submit suggestion', true));

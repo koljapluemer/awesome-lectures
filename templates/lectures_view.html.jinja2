@@ -40,6 +40,7 @@
   <dialog id="tag-modal" class="al-modal">
     <h3>Suggest a tag</h3>
     <input type="text" id="tag-input" class="al-input" placeholder="e.g. seminar, game-design" autocomplete="off">
+    <input id="tag-hp" name="website" style="display:none" tabindex="-1" autocomplete="off">
     <div class="modal-actions">
       <button type="button" id="tag-cancel">Cancel</button>
       <button type="button" id="tag-submit" data-primary>Submit</button>
@@ -54,6 +55,7 @@
         autocomplete="off">
       <button type="button" id="edit-tags-add" class="modal-btn">Add</button>
     </div>
+    <input id="edit-tags-hp" name="website" style="display:none" tabindex="-1" autocomplete="off">
     <div class="modal-actions" style="margin-top:1rem;">
       <button type="button" id="edit-tags-cancel">Cancel</button>
       <button type="button" id="edit-tags-submit" data-primary>Submit</button>
@@ -149,6 +151,7 @@
     <p class="text-sm text-muted" style="margin-bottom:0.5rem;">Watch this if you want to…</p>
     <input type="text" id="learning-input" class="al-input" placeholder="…understand how card games are designed"
       autocomplete="off">
+    <input id="learning-hp" name="website" style="display:none" tabindex="-1" autocomplete="off">
     <div class="modal-actions">
       <button type="button" id="learning-cancel">Cancel</button>
       <button type="button" id="learning-submit" data-primary>Submit</button>
