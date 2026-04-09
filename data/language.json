@@ -8,5 +8,8 @@
     ],
     "year": 2010,
     "extra": "describes the similarities and differences between different human and animal languages. He focuses on how we use language to communicate with each other, how we communicate with animals, and how animals commute with each other. Stanford 23. Language",
-    "embed": true
+    "embed": true,
+    "topics": {
+        "linguistics": 1
+    }
 }
