@@ -3,22 +3,44 @@
 
 {% block content %}
 <div class="container py-lg">
-  <div style="min-height:30vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding: 3rem 0 2rem;">
+  <div
+    style="min-height:30vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding: 3rem 0 2rem;">
     <h1 class="text-2xl font-bold mb-sm">Awesome Lectures</h1>
     <p class="text-md text-muted mb-lg">A curated collection of talks worth watching.</p>
+
     <a href="{{ root }}lectures/random/" class="text-lg">Browse all lectures &rarr;</a>
   </div>
 
   {% if featured %}
-  <div class="mb-sm" style="display:flex; align-items:baseline; justify-content:space-between;">
+  <hr />
+
+  <div class="mb-sm" style="display:flex; align-items:baseline; justify-content:space-between">
     <h2 class="font-bold text-lg">Featured lectures</h2>
     <a href="{{ root }}lectures/random/" class="text-sm">See all &rarr;</a>
   </div>
-  <div class="flex flex-col gap-md">
+  <div class="flex flex-col gap-md mb-md">
     {% for lecture in featured %}
     {{ lecture_card(lecture, root) }}
     {% endfor %}
+    <hr />
   </div>
   {% endif %}
+
+  <div class="flex flex-col gap-md mb-lg">
+    <p class="text-md">Hi, I am <a href="https://koljasam.com/">Kolja Sam</a>.</p>
+    <p class="text-md">I started this site because...</p>
+    <ul class="text-md" style="padding-left: 1.5rem;">
+      <li>I like listening to lecture recordings</li>
+      <li>...but they are often hard to find, lingering on university websites in badly named YouTube videos with a
+        couple hundred views</li>
+    </ul>
+    <p class="text-md">Please feel free to browse, to submit lectures, or to contribute to the software on <a
+        href="https://github.com/koljapluemer/awesome-lectures">GitHub</a>.</p>
+    <p class="text-md">This platform is also an experiment in community management of value information; trying to bring
+      human curation back into a web full of corporate and slob and ads. You may be interested to adapt the software
+      stack to other information-exchange problems.</p>
+  </div>
+
+
 </div>
 {% endblock %}

@@ -42,7 +42,6 @@ What it produces:
 - `public/search/` — Pagefind-powered search page
 - `public/submit/` — lecture submission form (via staticforms.xyz)
 - `public/suggest-edit/<slug>/` — per-lecture edit suggestion form
-- `public/about/`
 - `public/thumbnails/` — YouTube thumbnails (400 px wide, WebP) or placeholder
 
 On first build, `ssg.py` checks YouTube's oEmbed API to determine embeddability for each lecture that lacks an `embed` field, and writes the result back to the JSON file. Thumbnails are fetched from YouTube, converted to WebP, and cached in `.thumbnails/`.

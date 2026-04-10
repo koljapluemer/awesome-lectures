@@ -4,10 +4,26 @@
 
 {% block head %}
 <style>
-  .form-group { display: flex; flex-direction: column; gap: 0.375rem; }
-  label { font-size: 0.875rem; font-weight: 700; }
-  label .optional { font-weight: 400; color: var(--text-muted); }
-  input[type="text"], input[type="url"], input[type="number"], textarea {
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  label .optional {
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  input[type="text"],
+  input[type="url"],
+  input[type="number"],
+  textarea {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 0.375rem;
@@ -17,12 +33,23 @@
     color: var(--text);
     width: 100%;
   }
-  input:focus, textarea:focus {
+
+  input:focus,
+  textarea:focus {
     outline: none;
     border-color: var(--accent);
   }
-  textarea { resize: vertical; min-height: 80px; }
-  .hint { font-size: 0.8rem; color: var(--text-muted); }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
   .submit-btn {
     background: var(--accent);
     color: #fff;
@@ -33,8 +60,16 @@
     cursor: pointer;
     align-self: flex-start;
   }
-  .submit-btn:hover { background: var(--accent-hover); }
-  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .submit-btn:hover {
+    background: var(--accent-hover);
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .add-btn {
     background: none;
     border: 1px dashed var(--border);
@@ -45,9 +80,22 @@
     cursor: pointer;
     align-self: flex-start;
   }
-  .add-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .dynamic-row { display: flex; gap: 0.5rem; align-items: center; }
-  .dynamic-row input { flex: 1; }
+
+  .add-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .dynamic-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .dynamic-row input {
+    flex: 1;
+  }
+
   .remove-btn {
     background: none;
     border: none;
@@ -58,9 +106,18 @@
     flex-shrink: 0;
     line-height: 1;
   }
-  .remove-btn:hover { color: var(--text); }
-  details.advanced { border: 1px solid var(--border); border-radius: 0.375rem; padding: 0.75rem 1rem; }
-  details.advanced > summary {
+
+  .remove-btn:hover {
+    color: var(--text);
+  }
+
+  details.advanced {
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    padding: 0.75rem 1rem;
+  }
+
+  details.advanced>summary {
     cursor: pointer;
     font-size: 0.875rem;
     font-weight: 700;
@@ -70,22 +127,68 @@
     align-items: center;
     gap: 0.4rem;
   }
-  details.advanced > summary::before { content: '▶'; font-size: 0.65rem; transition: transform 0.15s; }
-  details.advanced[open] > summary::before { transform: rotate(90deg); }
-  details.advanced > .advanced-fields { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
-  .rating-row { display: flex; align-items: center; gap: 0.75rem; }
-  .rating-row input[type="range"] { flex: 1; accent-color: var(--accent); }
-  .rating-row .rating-val { font-size: 0.9rem; font-weight: 700; min-width: 2rem; text-align: center; }
-  .rating-row-wrap { display: flex; flex-direction: column; gap: 0.25rem; }
-  .rating-opt-label { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; cursor: pointer; }
+
+  details.advanced>summary::before {
+    content: '▶';
+    font-size: 0.65rem;
+    transition: transform 0.15s;
+  }
+
+  details.advanced[open]>summary::before {
+    transform: rotate(90deg);
+  }
+
+  details.advanced>.advanced-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .rating-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .rating-row input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent);
+  }
+
+  .rating-row .rating-val {
+    font-size: 0.9rem;
+    font-weight: 700;
+    min-width: 2rem;
+    text-align: center;
+  }
+
+  .rating-row-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .rating-opt-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container py-lg" style="max-width:600px;">
   <h1 class="text-2xl font-bold mb-sm">Submit a Lecture</h1>
-  <p class="text-sm text-muted mb-lg">Know a great talk? Submit it for review and we'll add it to the collection.</p>
+  <p class="text-md">Know a great talk? Submit it for review and we'll add it to the collection.</p>
 
+  <p class="text-md">You can also open an issue or a PR on <a
+      href="https://github.com/koljapluemer/awesome-lectures">GitHub</a>.</p>
+
+  <hr />
   <div id="submit-form" class="flex flex-col gap-md">
 
     <!-- Title -->
@@ -159,7 +262,8 @@
         <div class="form-group">
           <label>Audio quality <span class="optional">(optional)</span></label>
           <div class="rating-row-wrap">
-            <label class="rating-opt-label"><input type="checkbox" id="audioQuality-on"> I have an opinion on this</label>
+            <label class="rating-opt-label"><input type="checkbox" id="audioQuality-on"> I have an opinion on
+              this</label>
             <div class="rating-row" id="audioQuality-row" style="display:none;">
               <input type="range" id="audioQuality" min="0" max="10" step="0.5" value="5">
               <span class="rating-val" id="audioQuality-val">5</span>
@@ -171,7 +275,8 @@
         <div class="form-group">
           <label>Video quality <span class="optional">(optional)</span></label>
           <div class="rating-row-wrap">
-            <label class="rating-opt-label"><input type="checkbox" id="videoQuality-on"> I have an opinion on this</label>
+            <label class="rating-opt-label"><input type="checkbox" id="videoQuality-on"> I have an opinion on
+              this</label>
             <div class="rating-row" id="videoQuality-row" style="display:none;">
               <input type="range" id="videoQuality" min="0" max="10" step="0.5" value="5">
               <span class="rating-val" id="videoQuality-val">5</span>
@@ -184,7 +289,8 @@
           <label>Expertise level <span class="optional">(optional)</span></label>
           <span class="hint">0 = very beginner-friendly, 10 = expert-level</span>
           <div class="rating-row-wrap">
-            <label class="rating-opt-label"><input type="checkbox" id="beginnerExpertSpectrum-on"> I have an opinion on this</label>
+            <label class="rating-opt-label"><input type="checkbox" id="beginnerExpertSpectrum-on"> I have an opinion on
+              this</label>
             <div class="rating-row" id="beginnerExpertSpectrum-row" style="display:none;">
               <input type="range" id="beginnerExpertSpectrum" min="0" max="10" step="0.5" value="5">
               <span class="rating-val" id="beginnerExpertSpectrum-val">5</span>
@@ -196,7 +302,8 @@
         <div class="form-group">
           <label>Worth listening to without the video? <span class="optional">(optional)</span></label>
           <div class="rating-row-wrap">
-            <label class="rating-opt-label"><input type="checkbox" id="worthListeningToWithoutVideo-on"> I have an opinion on this</label>
+            <label class="rating-opt-label"><input type="checkbox" id="worthListeningToWithoutVideo-on"> I have an
+              opinion on this</label>
             <div class="rating-row" id="worthListeningToWithoutVideo-row" style="display:none;">
               <input type="range" id="worthListeningToWithoutVideo" min="0" max="10" step="0.5" value="5">
               <span class="rating-val" id="worthListeningToWithoutVideo-val">5</span>
@@ -214,117 +321,117 @@
 </div>
 
 <script>
-(function () {
-  const formOpenedAt = Date.now();
-  // — URL list —
-  const urlsList = document.getElementById('urls-list');
-  function addUrl(val) {
-    const row = document.createElement('div');
-    row.className = 'dynamic-row';
-    row.innerHTML = `<input type="url" placeholder="https://..." value="${val || ''}"><button type="button" class="remove-btn" aria-label="Remove URL">✕</button>`;
-    row.querySelector('.remove-btn').addEventListener('click', () => {
-      if (urlsList.children.length > 1) row.remove();
-    });
-    urlsList.appendChild(row);
-  }
-  addUrl('');
-  document.getElementById('add-url-btn').addEventListener('click', () => addUrl(''));
-
-  // — Learnings list —
-  const learningsList = document.getElementById('learnings-list');
-  function addLearning(val) {
-    const row = document.createElement('div');
-    row.className = 'dynamic-row';
-    row.innerHTML = `<input type="text" placeholder="…understand how card games are designed" value="${val || ''}"><button type="button" class="remove-btn" aria-label="Remove learning">✕</button>`;
-    row.querySelector('.remove-btn').addEventListener('click', () => row.remove());
-    learningsList.appendChild(row);
-  }
-  document.getElementById('add-learning-btn').addEventListener('click', () => addLearning(''));
-
-  // — Rating sliders —
-  ['audioQuality', 'videoQuality', 'beginnerExpertSpectrum', 'worthListeningToWithoutVideo'].forEach(id => {
-    const checkbox = document.getElementById(id + '-on');
-    const row      = document.getElementById(id + '-row');
-    const slider   = document.getElementById(id);
-    const val      = document.getElementById(id + '-val');
-    checkbox.addEventListener('change', () => { row.style.display = checkbox.checked ? 'flex' : 'none'; });
-    slider.addEventListener('input', () => { val.textContent = slider.value; });
-  });
-
-  // — Submit —
-  document.getElementById('submit-btn').addEventListener('click', () => {
-    const urls = [...urlsList.querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
-    if (!urls.length) { toast('Please enter at least one URL', true); return; }
-
-    const payload = { url: urls[0] };
-    if (urls.length > 1) payload.urls = urls;
-
-    const title = document.getElementById('title').value.trim();
-    if (title) payload.title = title;
-
-    const speakers = document.getElementById('speakers').value.split(',').map(s => s.trim()).filter(Boolean);
-    if (speakers.length) payload.speakers = speakers;
-
-    const year = parseInt(document.getElementById('year').value, 10);
-    if (!isNaN(year)) payload.year = year;
-
-    const extra = document.getElementById('extra').value.trim();
-    if (extra) payload.extra = extra;
-
-    const startsAt = parseInt(document.getElementById('startsAt').value, 10);
-    if (!isNaN(startsAt) && startsAt > 0) payload.startsAt = startsAt;
-
-    if (document.getElementById('embed').checked) payload.embed = true;
-
-    const topics = document.getElementById('topics').value.split(',').map(s => s.trim()).filter(Boolean);
-    if (topics.length) payload.topics = topics;
-
-    const tags = document.getElementById('tags').value.split(',').map(s => s.trim()).filter(Boolean);
-    if (tags.length) payload.tags = tags;
-
-    const learnings = [...learningsList.querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
-    if (learnings.length) payload.learnings = learnings;
-
-    ['audioQuality', 'videoQuality', 'beginnerExpertSpectrum', 'worthListeningToWithoutVideo'].forEach(id => {
-      if (document.getElementById(id + '-on').checked)
-        payload[id] = parseFloat(document.getElementById(id).value);
-    });
-
-    if (AL_API_BASE === null) {
-      toast('Submissions are disabled in preview mode', true);
-      return;
+  (function () {
+    const formOpenedAt = Date.now();
+    // — URL list —
+    const urlsList = document.getElementById('urls-list');
+    function addUrl(val) {
+      const row = document.createElement('div');
+      row.className = 'dynamic-row';
+      row.innerHTML = `<input type="url" placeholder="https://..." value="${val || ''}"><button type="button" class="remove-btn" aria-label="Remove URL">✕</button>`;
+      row.querySelector('.remove-btn').addEventListener('click', () => {
+        if (urlsList.children.length > 1) row.remove();
+      });
+      urlsList.appendChild(row);
     }
+    addUrl('');
+    document.getElementById('add-url-btn').addEventListener('click', () => addUrl(''));
 
-    const hp = document.getElementById('submit-hp').value;
-    if (hp || Date.now() - formOpenedAt < 2000) return;
+    // — Learnings list —
+    const learningsList = document.getElementById('learnings-list');
+    function addLearning(val) {
+      const row = document.createElement('div');
+      row.className = 'dynamic-row';
+      row.innerHTML = `<input type="text" placeholder="…understand how card games are designed" value="${val || ''}"><button type="button" class="remove-btn" aria-label="Remove learning">✕</button>`;
+      row.querySelector('.remove-btn').addEventListener('click', () => row.remove());
+      learningsList.appendChild(row);
+    }
+    document.getElementById('add-learning-btn').addEventListener('click', () => addLearning(''));
 
-    const btn = document.getElementById('submit-btn');
-    btn.disabled = true;
-    fetch(`${AL_API_BASE}/api/suggestions/lectures`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-AL-Fingerprint': getFingerprint() },
-      body: JSON.stringify({ ...payload, hp }),
-    })
-      .then(r => {
-        if (r.ok) {
-          toast('Submission received, thanks!');
-          document.getElementById('submit-form').querySelectorAll('input, textarea').forEach(el => {
-            if (el.type === 'checkbox') el.checked = false;
-            else if (el.type === 'range') { el.value = 5; const v = document.getElementById(el.id + '-val'); if (v) v.textContent = '5'; }
-            else el.value = '';
-          });
-          while (urlsList.children.length > 1) urlsList.lastChild.remove();
-          while (learningsList.firstChild) learningsList.firstChild.remove();
-          ['audioQuality', 'videoQuality', 'beginnerExpertSpectrum', 'worthListeningToWithoutVideo'].forEach(id => {
-            document.getElementById(id + '-row').style.display = 'none';
-          });
-        } else {
-          throw new Error();
-        }
+    // — Rating sliders —
+    ['audioQuality', 'videoQuality', 'beginnerExpertSpectrum', 'worthListeningToWithoutVideo'].forEach(id => {
+      const checkbox = document.getElementById(id + '-on');
+      const row = document.getElementById(id + '-row');
+      const slider = document.getElementById(id);
+      const val = document.getElementById(id + '-val');
+      checkbox.addEventListener('change', () => { row.style.display = checkbox.checked ? 'flex' : 'none'; });
+      slider.addEventListener('input', () => { val.textContent = slider.value; });
+    });
+
+    // — Submit —
+    document.getElementById('submit-btn').addEventListener('click', () => {
+      const urls = [...urlsList.querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
+      if (!urls.length) { toast('Please enter at least one URL', true); return; }
+
+      const payload = { url: urls[0] };
+      if (urls.length > 1) payload.urls = urls;
+
+      const title = document.getElementById('title').value.trim();
+      if (title) payload.title = title;
+
+      const speakers = document.getElementById('speakers').value.split(',').map(s => s.trim()).filter(Boolean);
+      if (speakers.length) payload.speakers = speakers;
+
+      const year = parseInt(document.getElementById('year').value, 10);
+      if (!isNaN(year)) payload.year = year;
+
+      const extra = document.getElementById('extra').value.trim();
+      if (extra) payload.extra = extra;
+
+      const startsAt = parseInt(document.getElementById('startsAt').value, 10);
+      if (!isNaN(startsAt) && startsAt > 0) payload.startsAt = startsAt;
+
+      if (document.getElementById('embed').checked) payload.embed = true;
+
+      const topics = document.getElementById('topics').value.split(',').map(s => s.trim()).filter(Boolean);
+      if (topics.length) payload.topics = topics;
+
+      const tags = document.getElementById('tags').value.split(',').map(s => s.trim()).filter(Boolean);
+      if (tags.length) payload.tags = tags;
+
+      const learnings = [...learningsList.querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
+      if (learnings.length) payload.learnings = learnings;
+
+      ['audioQuality', 'videoQuality', 'beginnerExpertSpectrum', 'worthListeningToWithoutVideo'].forEach(id => {
+        if (document.getElementById(id + '-on').checked)
+          payload[id] = parseFloat(document.getElementById(id).value);
+      });
+
+      if (AL_API_BASE === null) {
+        toast('Submissions are disabled in preview mode', true);
+        return;
+      }
+
+      const hp = document.getElementById('submit-hp').value;
+      if (hp || Date.now() - formOpenedAt < 2000) return;
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      fetch(`${AL_API_BASE}/api/suggestions/lectures`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-AL-Fingerprint': getFingerprint() },
+        body: JSON.stringify({ ...payload, hp }),
       })
-      .catch(() => toast('Could not submit, please try again', true))
-      .finally(() => { btn.disabled = false; });
-  });
-})();
+        .then(r => {
+          if (r.ok) {
+            toast('Submission received, thanks!');
+            document.getElementById('submit-form').querySelectorAll('input, textarea').forEach(el => {
+              if (el.type === 'checkbox') el.checked = false;
+              else if (el.type === 'range') { el.value = 5; const v = document.getElementById(el.id + '-val'); if (v) v.textContent = '5'; }
+              else el.value = '';
+            });
+            while (urlsList.children.length > 1) urlsList.lastChild.remove();
+            while (learningsList.firstChild) learningsList.firstChild.remove();
+            ['audioQuality', 'videoQuality', 'beginnerExpertSpectrum', 'worthListeningToWithoutVideo'].forEach(id => {
+              document.getElementById(id + '-row').style.display = 'none';
+            });
+          } else {
+            throw new Error();
+          }
+        })
+        .catch(() => toast('Could not submit, please try again', true))
+        .finally(() => { btn.disabled = false; });
+    });
+  })();
 </script>
 {% endblock %}

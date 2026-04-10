@@ -251,12 +251,6 @@ def build():
     tpl = env.get_template("search.html.jinja2")
     (search_dir / "index.html").write_text(tpl.render(root="../", **common))
 
-    # About page
-    about_dir = PUBLIC_DIR / "about"
-    about_dir.mkdir()
-    tpl = env.get_template("about.html.jinja2")
-    (about_dir / "index.html").write_text(tpl.render(root="../", **common))
-
     # Submit page + thanks
     submit_dir = PUBLIC_DIR / "submit"
     submit_dir.mkdir()
