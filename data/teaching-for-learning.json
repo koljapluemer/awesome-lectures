@@ -6,5 +6,15 @@
     "urls": [
         "https://www.youtube.com/watch?v=G8wNyqPUYtU"
     ],
-    "embed": true
+    "embed": true,
+    "worthListeningToWithoutVideo": 9,
+    "startsAt": 320,
+    "learnings": [
+        {
+            "get basic understanding of student learning and motivation": {
+                "rating": 5,
+                "weight": 0
+            }
+        }
+    ]
 }
