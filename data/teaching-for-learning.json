@@ -15,5 +15,10 @@
                 "weight": 0
             }
         }
-    ]
+    ],
+    "worthListeningToWithoutVideo": {
+        "rating": 5.3182,
+        "weight": 1,
+        "spread": 2.1561
+    }
 }

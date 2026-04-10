@@ -3,5 +3,13 @@
     "urls": [
         "https://www.youtube.com/watch?v=HDpyEwfMqPA"
     ],
-    "embed": true
+    "embed": true,
+    "learnings": [
+        {
+            "get to know the early history of Khan academy": {
+                "rating": 5,
+                "weight": 0
+            }
+        }
+    ]
 }
