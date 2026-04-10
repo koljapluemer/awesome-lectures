@@ -240,7 +240,7 @@ def build():
     def _learning_count(lec):
         return sum(len(block) for block in (lec.get("learnings") or []))
 
-    eligible = [l for l in lectures if _learning_count(l) >= 2]
+    eligible = [l for l in lectures if _learning_count(l) >= 1]
     featured = random.sample(eligible, min(3, len(eligible)))
     tpl = env.get_template("index.html.jinja2")
     (PUBLIC_DIR / "index.html").write_text(tpl.render(root="", featured=featured, **common))
