@@ -3,12 +3,9 @@
 
 {% block content %}
 <div class="container py-lg">
-  <div
-    style="min-height:30vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding: 3rem 0 2rem;">
-    <h1 class="text-2xl font-bold mb-sm">Awesome Lectures</h1>
-    <p class="text-md text-muted mb-lg">A curated collection of talks worth watching.</p>
-
-    <a href="{{ root }}lectures/random/" class="text-lg">Browse all lectures &rarr;</a>
+  <div class="my-md">
+    <h1 class="font-bold text-xl mb-sm">Awesome Lectures</h1>
+    <p class="text-md text-muted">A curated collection of talks worth watching. <a href="{{ root }}lectures/random/">Browse all &rarr;</a></p>
   </div>
 
   {% if featured %}
