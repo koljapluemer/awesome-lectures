@@ -174,9 +174,19 @@
       <div id="card-edits-{{ s.id }}" data-section="edits" data-type="lecture" data-id="{{ s.id }}" data-is-edit="true"
            class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm">
         <div class="px-5 py-4 border-b border-gray-700 flex items-start justify-between gap-4">
-          <div>
+          <div class="min-w-0">
             <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Edit Suggestion</span>
-            <h3 class="mt-1 text-base font-semibold text-white font-mono">{{ s.slug }}</h3>
+            <h3 class="mt-1 text-base font-semibold text-white">
+              {{ s.current_title or s.slug }}
+            </h3>
+            <div class="mt-1 flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-mono text-gray-500">{{ s.slug }}</span>
+              {% if s.current_url %}
+              <span class="text-gray-700">·</span>
+              <a href="{{ s.current_url }}" target="_blank" rel="noopener"
+                 class="text-xs text-indigo-400 hover:text-indigo-300 truncate max-w-xs">{{ s.current_url }}</a>
+              {% endif %}
+            </div>
           </div>
           <time class="text-xs text-gray-500 shrink-0 mt-1">{{ s.created_at }}</time>
         </div>

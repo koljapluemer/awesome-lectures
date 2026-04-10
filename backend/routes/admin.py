@@ -153,18 +153,36 @@ def index():
            ORDER BY slug, field"""
     ).fetchall()
 
-    # Pre-parse data JSON for edit suggestions so template can iterate it
+    # Pre-parse data JSON for edit suggestions so template can iterate it.
+    # Also fetch the current lecture content so the moderator can see the live
+    # title and URL when validating the proposed changes.
+    token  = _gh_token()
+    repo   = _gh_repo()
+    branch = _gh_branch()
+
     edit_parsed = []
     for row in edit_suggestions:
         data = json.loads(row["data"] or "{}")
+        slug = data.get("slug", "")
+        current_title = None
+        current_url   = None
+        try:
+            live, _ = github_api.get_file(repo, f"data/{slug}.json", branch, token)
+            current_title = live.get("title", "")
+            urls = live.get("urls", [])
+            current_url = urls[0] if urls else None
+        except Exception:
+            pass
         edit_parsed.append({
-            "id":         row["id"],
-            "slug":       data.get("slug", ""),
-            "url":        row["url"],
-            "title":      row["title"],
-            "note":       row["note"],
-            "data":       data,
-            "created_at": row["created_at"],
+            "id":            row["id"],
+            "slug":          slug,
+            "url":           row["url"],
+            "title":         row["title"],
+            "note":          row["note"],
+            "data":          data,
+            "created_at":    row["created_at"],
+            "current_title": current_title,
+            "current_url":   current_url,
         })
 
     new_parsed = []
