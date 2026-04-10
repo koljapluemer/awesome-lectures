@@ -146,7 +146,7 @@ def load_lectures() -> list[dict]:
 
         # Add one phantom vote of 5 to all scaleRating fields for display.
         for field in ("audioQuality", "videoQuality", "beginnerExpertSpectrum", "worthListeningToWithoutVideo"):
-            if data.get(field):
+            if isinstance(data.get(field), dict):
                 _add_prior_vote(data[field])
         for block in (data.get("learnings") or []):
             for val in block.values():

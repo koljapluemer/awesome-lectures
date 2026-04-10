@@ -1,4 +1,5 @@
 import json
+import math
 import secrets
 from functools import wraps
 
@@ -225,6 +226,37 @@ def _rebuild_learnings(flat: dict) -> list:
     return [{k: v} for k, v in flat.items()]
 
 
+def _apply_scale_votes(obj: dict, values: list) -> dict:
+    """Integrate new votes into a scaleRating object using Algorithm B (ratings.md).
+
+    Recovers sum_ratings and sum_squares from the stored Bayesian mean/spread,
+    adds the new votes, then recomputes rating and spread with the prior baked in.
+    prior_weight=10, prior_mean=5, prior_sum_squares=290.
+    """
+    w = obj.get("weight", 0)
+    r = obj.get("rating", 5.0)
+    s = obj.get("spread", 0.0)
+    total_w = w + 10
+    if w > 0:
+        sum_ratings = r * total_w - 50.0
+        sum_squares = (s ** 2 + r ** 2) * total_w - 290.0
+    else:
+        sum_ratings = 0.0
+        sum_squares = 0.0
+    sum_ratings += sum(values)
+    sum_squares += sum(v ** 2 for v in values)
+    new_weight = w + len(values)
+    new_total_w = new_weight + 10
+    new_rating = (sum_ratings + 50.0) / new_total_w
+    new_var = (sum_squares + 290.0) / new_total_w - new_rating ** 2
+    new_spread = math.sqrt(max(0.0, new_var))
+    return {
+        "rating": round(new_rating, 4),
+        "weight": new_weight,
+        "spread": round(new_spread, 4),
+    }
+
+
 def _smart_merge_collection(existing: dict, proposed_keys: list) -> dict:
     """
     Merge a topics/tags dict.
@@ -304,7 +336,7 @@ def approve_lecture(id):
             content["learnings"] = _rebuild_learnings(merged)
 
         for key in KNOWN_SCALE_FIELDS:
-            if key in data:
+            if isinstance(data.get(key), dict):
                 content[key] = data[key]
 
         commit_msg = f"moderation: edit {slug}"
@@ -325,7 +357,7 @@ def approve_lecture(id):
                 {text: {"rating": 5, "weight": 0}} for text in data["learnings"]
             ]
         for key in KNOWN_SCALE_FIELDS:
-            if key in data:
+            if isinstance(data.get(key), dict):
                 content[key] = data[key]
         sha = None
         commit_msg = f"moderation: add {slug}"
@@ -484,23 +516,17 @@ def approve_ratings():
 
     if is_learning:
         flat = _flatten_learnings(content)
-        obj  = flat.get(field, {"rating": 5, "weight": 0})
+        obj  = flat.get(field, {"rating": 5.0, "weight": 0, "spread": 0.0})
     else:
-        obj = content.get(field, {"rating": 5, "weight": 0})
+        obj = content.get(field, {"rating": 5.0, "weight": 0, "spread": 0.0})
 
-    old_weight = obj.get("weight", 0)
-    old_rating = obj.get("rating", 5)
-    new_weight = old_weight + count
-    new_rating = (old_rating * old_weight + total) / new_weight
-
-    obj["rating"] = round(new_rating, 4)
-    obj["weight"] = new_weight
+    updated = _apply_scale_votes(obj, values)
 
     if is_learning:
-        flat[field] = obj
+        flat[field] = updated
         content["learnings"] = _rebuild_learnings(flat)
     else:
-        content[field] = obj
+        content[field] = updated
 
     try:
         github_api.put_file(
@@ -762,20 +788,15 @@ def batch():
             is_learning = field not in KNOWN_SCALE_FIELDS
             if is_learning:
                 flat = _flatten_learnings(content)
-                obj  = flat.get(field, {"rating": 5, "weight": 0})
+                obj  = flat.get(field, {"rating": 5.0, "weight": 0, "spread": 0.0})
             else:
-                obj = content.get(field, {"rating": 5, "weight": 0})
-            old_weight = obj.get("weight", 0)
-            old_rating = obj.get("rating", 5)
-            new_weight = old_weight + count
-            new_rating = (old_rating * old_weight + total) / new_weight
-            obj["rating"] = round(new_rating, 4)
-            obj["weight"] = new_weight
+                obj = content.get(field, {"rating": 5.0, "weight": 0, "spread": 0.0})
+            updated = _apply_scale_votes(obj, values)
             if is_learning:
-                flat[field] = obj
+                flat[field] = updated
                 content["learnings"] = _rebuild_learnings(flat)
             else:
-                content[field] = obj
+                content[field] = updated
             commit_parts.append(f"apply {count} rating(s) for '{field}' on {slug}")
             db_deletes.append(
                 ("DELETE FROM rating_votes WHERE slug = ? AND field = ?", (slug, field))
