@@ -84,3 +84,68 @@ def put_file(
         timeout=15,
     )
     resp.raise_for_status()
+
+
+def put_files(
+    repo: str,
+    branch: str,
+    token: str,
+    files: dict,
+    message: str,
+) -> None:
+    """
+    Commit multiple JSON files in a single git commit using the Git Data API.
+    files: {path: content_dict}
+    Raises requests.HTTPError on failure.
+    """
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+    }
+
+    r = requests.get(
+        f"{GITHUB_API}/repos/{repo}/git/ref/heads/{branch}",
+        headers=headers, timeout=10,
+    )
+    r.raise_for_status()
+    head_sha = r.json()["object"]["sha"]
+
+    r = requests.get(
+        f"{GITHUB_API}/repos/{repo}/git/commits/{head_sha}",
+        headers=headers, timeout=10,
+    )
+    r.raise_for_status()
+    base_tree_sha = r.json()["tree"]["sha"]
+
+    tree_entries = [
+        {
+            "path": path,
+            "mode": "100644",
+            "type": "blob",
+            "content": json.dumps(content, indent=4, ensure_ascii=False),
+        }
+        for path, content in files.items()
+    ]
+
+    r = requests.post(
+        f"{GITHUB_API}/repos/{repo}/git/trees",
+        json={"base_tree": base_tree_sha, "tree": tree_entries},
+        headers=headers, timeout=30,
+    )
+    r.raise_for_status()
+    new_tree_sha = r.json()["sha"]
+
+    r = requests.post(
+        f"{GITHUB_API}/repos/{repo}/git/commits",
+        json={"message": message, "tree": new_tree_sha, "parents": [head_sha]},
+        headers=headers, timeout=10,
+    )
+    r.raise_for_status()
+    new_commit_sha = r.json()["sha"]
+
+    r = requests.patch(
+        f"{GITHUB_API}/repos/{repo}/git/refs/heads/{branch}",
+        json={"sha": new_commit_sha},
+        headers=headers, timeout=10,
+    )
+    r.raise_for_status()

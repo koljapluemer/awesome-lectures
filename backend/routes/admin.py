@@ -510,3 +510,276 @@ def discard_ratings():
     db.execute("DELETE FROM rating_votes WHERE slug = ? AND field = ?", (slug, field))
     db.commit()
     return jsonify({"status": "ok"})
+
+
+# ---------------------------------------------------------------------------
+# API: batch
+# ---------------------------------------------------------------------------
+
+@bp.post("/api/batch")
+@require_moderator
+def batch():
+    """
+    Process multiple moderation decisions in one request, writing a single commit.
+
+    Expects JSON: { "decisions": [ { "type", "action", ... }, ... ] }
+    action: "accept" | "deny" | "ignore"
+    type "lecture": also needs "id"; new lectures also need "slug"
+    type "learning": needs "id"
+    type "topic":    needs "id"
+    type "rating":   needs "slug" and "field"
+    """
+    body = request.get_json(silent=True) or {}
+    decisions = body.get("decisions", [])
+    if not decisions:
+        return jsonify({"error": "no decisions provided"}), 400
+
+    token  = _gh_token()
+    repo   = _gh_repo()
+    branch = _gh_branch()
+    db_conn = get_db()
+
+    # --- Pre-fetch DB rows for all non-ignored decisions --------------------
+    lecture_rows  = {}
+    learning_rows = {}
+    topic_rows    = {}
+
+    for d in decisions:
+        if d.get("action", "ignore") == "ignore":
+            continue
+        dtype = d.get("type")
+        rid   = d.get("id")
+
+        if dtype == "lecture" and rid and rid not in lecture_rows:
+            row = db_conn.execute(
+                "SELECT * FROM lecture_suggestions WHERE id = ?", (rid,)
+            ).fetchone()
+            if not row:
+                return jsonify({"error": f"lecture suggestion {rid} not found"}), 404
+            lecture_rows[rid] = row
+
+        elif dtype == "learning" and rid and rid not in learning_rows:
+            row = db_conn.execute(
+                "SELECT * FROM learning_suggestions WHERE id = ?", (rid,)
+            ).fetchone()
+            if not row:
+                return jsonify({"error": f"learning suggestion {rid} not found"}), 404
+            learning_rows[rid] = row
+
+        elif dtype == "topic" and rid and rid not in topic_rows:
+            row = db_conn.execute(
+                "SELECT * FROM topic_suggestions WHERE id = ?", (rid,)
+            ).fetchone()
+            if not row:
+                return jsonify({"error": f"topic suggestion {rid} not found"}), 404
+            topic_rows[rid] = row
+
+    # --- Determine which slugs need fetching (accepted items only) ----------
+    slugs_needed      = set()
+    new_lecture_slugs = {}  # id -> provided slug
+
+    for d in decisions:
+        if d.get("action") != "accept":
+            continue
+        dtype = d.get("type")
+
+        if dtype == "lecture":
+            rid  = d["id"]
+            data = json.loads(lecture_rows[rid]["data"] or "{}")
+            if "slug" in data:
+                slugs_needed.add(data["slug"])
+            else:
+                slug = d.get("slug", "").strip()
+                if not slug:
+                    return jsonify({"error": f"slug required for new lecture (id={rid})"}), 400
+                new_lecture_slugs[rid] = slug
+
+        elif dtype == "learning":
+            slugs_needed.add(learning_rows[d["id"]]["slug"])
+
+        elif dtype == "topic":
+            slugs_needed.add(topic_rows[d["id"]]["slug"])
+
+        elif dtype == "rating":
+            slug  = d.get("slug", "").strip()
+            field = d.get("field", "").strip()
+            if not slug or not field:
+                return jsonify({"error": "rating decision requires slug and field"}), 400
+            slugs_needed.add(slug)
+
+    # --- Fetch files from GitHub once per slug ------------------------------
+    file_cache = {}
+    for slug in slugs_needed:
+        try:
+            content, _sha = github_api.get_file(repo, f"data/{slug}.json", branch, token)
+            file_cache[slug] = content
+        except http.HTTPError as e:
+            return _github_error_response(e)
+
+    # --- Apply accepted changes to in-memory content -----------------------
+    commit_parts = []
+    db_deletes   = []
+
+    for d in decisions:
+        action = d.get("action", "ignore")
+        dtype  = d.get("type")
+
+        if action == "ignore":
+            continue
+
+        if action == "deny":
+            if dtype == "lecture":
+                db_deletes.append(
+                    ("DELETE FROM lecture_suggestions WHERE id = ?", (d["id"],))
+                )
+            elif dtype == "learning":
+                db_deletes.append(
+                    ("DELETE FROM learning_suggestions WHERE id = ?", (d["id"],))
+                )
+            elif dtype == "topic":
+                db_deletes.append(
+                    ("DELETE FROM topic_suggestions WHERE id = ?", (d["id"],))
+                )
+            elif dtype == "rating":
+                db_deletes.append(
+                    ("DELETE FROM rating_votes WHERE slug = ? AND field = ?",
+                     (d["slug"], d["field"]))
+                )
+            continue
+
+        # action == "accept"
+        if dtype == "lecture":
+            rid  = d["id"]
+            row  = lecture_rows[rid]
+            data = json.loads(row["data"] or "{}")
+
+            if "slug" in data:
+                slug    = data["slug"]
+                content = file_cache[slug]
+                if row["title"] is not None:
+                    content["title"] = row["title"]
+                if row["note"] is not None:
+                    content["extra"] = row["note"]
+                for key in ("urls", "speakers", "year", "startsAt", "embed"):
+                    if key in data:
+                        content[key] = data[key]
+                for collection in ("topics", "tags"):
+                    if collection in data:
+                        content[collection] = _smart_merge_collection(
+                            content.get(collection, {}), data[collection]
+                        )
+                if "learnings" in data:
+                    flat   = _flatten_learnings(content)
+                    merged = {t: flat.get(t, {"rating": 5, "weight": 0})
+                              for t in data["learnings"]}
+                    content["learnings"] = _rebuild_learnings(merged)
+                for key in KNOWN_SCALE_FIELDS:
+                    if key in data:
+                        content[key] = data[key]
+                commit_parts.append(f"edit {slug}")
+            else:
+                slug    = new_lecture_slugs[rid]
+                content = {"title": row["title"] or "", "urls": data.get("urls", [row["url"]])}
+                if row["note"]:
+                    content["extra"] = row["note"]
+                for key in ("speakers", "year", "startsAt", "embed", "topics", "tags"):
+                    if key in data:
+                        content[key] = data[key]
+                if "learnings" in data:
+                    content["learnings"] = [
+                        {t: {"rating": 5, "weight": 0}} for t in data["learnings"]
+                    ]
+                for key in KNOWN_SCALE_FIELDS:
+                    if key in data:
+                        content[key] = data[key]
+                file_cache[slug] = content
+                commit_parts.append(f"add {slug}")
+
+            db_deletes.append(
+                ("DELETE FROM lecture_suggestions WHERE id = ?", (rid,))
+            )
+
+        elif dtype == "learning":
+            rid     = d["id"]
+            row     = learning_rows[rid]
+            slug    = row["slug"]
+            content = file_cache[slug]
+            flat    = _flatten_learnings(content)
+            if row["learning"] not in flat:
+                flat[row["learning"]] = {"rating": 5, "weight": 0}
+            content["learnings"] = _rebuild_learnings(flat)
+            commit_parts.append(f"add learning to {slug}")
+            db_deletes.append(
+                ("DELETE FROM learning_suggestions WHERE id = ?", (rid,))
+            )
+
+        elif dtype == "topic":
+            rid     = d["id"]
+            row     = topic_rows[rid]
+            slug    = row["slug"]
+            content = file_cache[slug]
+            topics  = content.get("topics", {})
+            if row["action"] == "add":
+                topics[row["topic"]] = max(1, topics.get(row["topic"], 0) + 1)
+            else:
+                topics[row["topic"]] = topics.get(row["topic"], 0) - 1
+            content["topics"] = topics
+            commit_parts.append(f"{row['action']} topic '{row['topic']}' on {slug}")
+            db_deletes.append(
+                ("DELETE FROM topic_suggestions WHERE id = ?", (rid,))
+            )
+
+        elif dtype == "rating":
+            slug    = d["slug"]
+            field   = d["field"]
+            votes   = db_conn.execute(
+                "SELECT value FROM rating_votes WHERE slug = ? AND field = ?", (slug, field)
+            ).fetchall()
+            if not votes:
+                return jsonify({"error": f"no votes found for {slug}/{field}"}), 404
+            values     = [r["value"] for r in votes]
+            count      = len(values)
+            total      = sum(values)
+            content    = file_cache[slug]
+            is_learning = field not in KNOWN_SCALE_FIELDS
+            if is_learning:
+                flat = _flatten_learnings(content)
+                obj  = flat.get(field, {"rating": 5, "weight": 0})
+            else:
+                obj = content.get(field, {"rating": 5, "weight": 0})
+            old_weight = obj.get("weight", 0)
+            old_rating = obj.get("rating", 5)
+            new_weight = old_weight + count
+            new_rating = (old_rating * old_weight + total) / new_weight
+            obj["rating"] = round(new_rating, 4)
+            obj["weight"] = new_weight
+            if is_learning:
+                flat[field] = obj
+                content["learnings"] = _rebuild_learnings(flat)
+            else:
+                content[field] = obj
+            commit_parts.append(f"apply {count} rating(s) for '{field}' on {slug}")
+            db_deletes.append(
+                ("DELETE FROM rating_votes WHERE slug = ? AND field = ?", (slug, field))
+            )
+
+    # --- Commit all file changes in one go ----------------------------------
+    if file_cache:
+        commit_msg = "moderation: " + "; ".join(commit_parts)
+        try:
+            github_api.put_files(
+                repo, branch, token,
+                {f"data/{slug}.json": content for slug, content in file_cache.items()},
+                commit_msg,
+            )
+        except http.HTTPError as e:
+            return _github_error_response(e)
+
+    # --- Clean up database --------------------------------------------------
+    for sql, params in db_deletes:
+        db_conn.execute(sql, params)
+    db_conn.commit()
+
+    accepted_count = sum(1 for d in decisions if d.get("action") == "accept")
+    denied_count   = sum(1 for d in decisions if d.get("action") == "deny")
+    return jsonify({"status": "ok", "accepted": accepted_count, "denied": denied_count})

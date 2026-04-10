@@ -84,13 +84,14 @@
 </div>
 
 <!-- Tab panels -->
-<main class="max-w-4xl mx-auto px-4 py-8 space-y-4">
+<main class="max-w-4xl mx-auto px-4 py-8 pb-24 space-y-4">
 
   <!-- NEW LECTURES -->
   <div id="panel-new" class="panel space-y-4">
     {% if new_suggestions %}
       {% for s in new_suggestions %}
-      <div id="card-new-{{ s.id }}" data-section="new" class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm">
+      <div id="card-new-{{ s.id }}" data-section="new" data-type="lecture" data-id="{{ s.id }}" data-is-edit="false"
+           class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm">
         <div class="px-5 py-4 border-b border-gray-700 flex items-start justify-between gap-4">
           <div>
             <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">New Lecture</span>
@@ -129,30 +130,35 @@
             {% endfor %}
           {% endif %}
 
-          <!-- Slug input -->
+          <!-- Slug input (required when accepting) -->
           <div>
             <label class="text-xs font-medium text-gray-500 uppercase tracking-wide" for="slug-new-{{ s.id }}">
-              Slug <span class="text-gray-600 normal-case font-normal">(confirm before approving)</span>
+              Slug <span class="text-gray-600 normal-case font-normal">(required when accepting)</span>
             </label>
             <input
               id="slug-new-{{ s.id }}"
               type="text"
               value="{{ s.title | lower | replace(' ', '-') }}"
-              class="mt-1 w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-1.5 text-sm font-mono text-gray-100
+              class="slug-input mt-1 w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-1.5 text-sm font-mono text-gray-100
                      focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
             >
           </div>
         </div>
 
-        <div class="px-5 py-3 bg-gray-900/50 flex gap-3">
-          <button onclick="actSlug('/admin/api/lecture-suggestions/{{ s.id }}/approve', 'card-new-{{ s.id }}', 'new', 'slug-new-{{ s.id }}')"
-                  class="px-4 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-sm font-medium text-white transition-colors">
-            Approve
-          </button>
-          <button onclick="act('/admin/api/lecture-suggestions/{{ s.id }}/discard', 'card-new-{{ s.id }}', 'new')"
-                  class="px-4 py-1.5 rounded-lg bg-red-800 hover:bg-red-700 text-sm font-medium text-white transition-colors">
-            Discard
-          </button>
+        <div class="px-5 py-3 bg-gray-900/50 flex items-center gap-5 flex-wrap">
+          <span class="text-xs text-gray-500 uppercase tracking-wide font-medium">Decision:</span>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ s.id }}" value="accept" onchange="onDecisionChange()" class="accent-emerald-500">
+            <span class="text-sm text-emerald-400">Accept</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ s.id }}" value="deny" onchange="onDecisionChange()" class="accent-red-500">
+            <span class="text-sm text-red-400">Deny</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ s.id }}" value="ignore" checked onchange="onDecisionChange()" class="accent-gray-500">
+            <span class="text-sm text-gray-500">Ignore for now</span>
+          </label>
         </div>
       </div>
       {% endfor %}
@@ -165,7 +171,8 @@
   <div id="panel-edits" class="panel hidden space-y-4">
     {% if edit_suggestions %}
       {% for s in edit_suggestions %}
-      <div id="card-edits-{{ s.id }}" data-section="edits" class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm">
+      <div id="card-edits-{{ s.id }}" data-section="edits" data-type="lecture" data-id="{{ s.id }}" data-is-edit="true"
+           class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm">
         <div class="px-5 py-4 border-b border-gray-700 flex items-start justify-between gap-4">
           <div>
             <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Edit Suggestion</span>
@@ -221,15 +228,20 @@
           {% endfor %}
         </div>
 
-        <div class="px-5 py-3 bg-gray-900/50 flex gap-3">
-          <button onclick="act('/admin/api/lecture-suggestions/{{ s.id }}/approve', 'card-edits-{{ s.id }}', 'edits', {'slug': '{{ s.slug }}'})"
-                  class="px-4 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-sm font-medium text-white transition-colors">
-            Approve
-          </button>
-          <button onclick="act('/admin/api/lecture-suggestions/{{ s.id }}/discard', 'card-edits-{{ s.id }}', 'edits')"
-                  class="px-4 py-1.5 rounded-lg bg-red-800 hover:bg-red-700 text-sm font-medium text-white transition-colors">
-            Discard
-          </button>
+        <div class="px-5 py-3 bg-gray-900/50 flex items-center gap-5 flex-wrap">
+          <span class="text-xs text-gray-500 uppercase tracking-wide font-medium">Decision:</span>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ s.id }}" value="accept" onchange="onDecisionChange()" class="accent-emerald-500">
+            <span class="text-sm text-emerald-400">Accept</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ s.id }}" value="deny" onchange="onDecisionChange()" class="accent-red-500">
+            <span class="text-sm text-red-400">Deny</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ s.id }}" value="ignore" checked onchange="onDecisionChange()" class="accent-gray-500">
+            <span class="text-sm text-gray-500">Ignore for now</span>
+          </label>
         </div>
       </div>
       {% endfor %}
@@ -242,7 +254,8 @@
   <div id="panel-learnings" class="panel hidden space-y-4">
     {% if learning_suggestions %}
       {% for s in learning_suggestions %}
-      <div id="card-learnings-{{ s.id }}" data-section="learnings" class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm">
+      <div id="card-learnings-{{ s.id }}" data-section="learnings" data-type="learning" data-id="{{ s.id }}"
+           class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm">
         <div class="px-5 py-4 border-b border-gray-700 flex items-start justify-between gap-4">
           <div>
             <span class="text-xs font-semibold uppercase tracking-wider text-purple-400">Learning Outcome</span>
@@ -257,15 +270,20 @@
           </blockquote>
         </div>
 
-        <div class="px-5 py-3 bg-gray-900/50 flex gap-3">
-          <button onclick="act('/admin/api/learning-suggestions/{{ s.id }}/approve', 'card-learnings-{{ s.id }}', 'learnings')"
-                  class="px-4 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-sm font-medium text-white transition-colors">
-            Approve
-          </button>
-          <button onclick="act('/admin/api/learning-suggestions/{{ s.id }}/discard', 'card-learnings-{{ s.id }}', 'learnings')"
-                  class="px-4 py-1.5 rounded-lg bg-red-800 hover:bg-red-700 text-sm font-medium text-white transition-colors">
-            Discard
-          </button>
+        <div class="px-5 py-3 bg-gray-900/50 flex items-center gap-5 flex-wrap">
+          <span class="text-xs text-gray-500 uppercase tracking-wide font-medium">Decision:</span>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ s.id }}" value="accept" onchange="onDecisionChange()" class="accent-emerald-500">
+            <span class="text-sm text-emerald-400">Accept</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ s.id }}" value="deny" onchange="onDecisionChange()" class="accent-red-500">
+            <span class="text-sm text-red-400">Deny</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ s.id }}" value="ignore" checked onchange="onDecisionChange()" class="accent-gray-500">
+            <span class="text-sm text-gray-500">Ignore for now</span>
+          </label>
         </div>
       </div>
       {% endfor %}
@@ -278,7 +296,8 @@
   <div id="panel-topics" class="panel hidden space-y-4">
     {% if topic_suggestions %}
       {% for s in topic_suggestions %}
-      <div id="card-topics-{{ s.id }}" data-section="topics" class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm">
+      <div id="card-topics-{{ s.id }}" data-section="topics" data-type="topic" data-id="{{ s.id }}"
+           class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm">
         <div class="px-5 py-4 flex items-center gap-4">
           <div class="flex-1 flex items-center gap-3 flex-wrap">
             <span class="text-sm font-mono text-gray-300">{{ s.slug }}</span>
@@ -296,20 +315,25 @@
           <time class="text-xs text-gray-500 shrink-0">{{ s.created_at }}</time>
         </div>
 
-        <div class="px-5 py-3 bg-gray-900/50 flex gap-3">
-          <button onclick="act('/admin/api/topic-suggestions/{{ s.id }}/approve', 'card-topics-{{ s.id }}', 'topics')"
-                  class="px-4 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-sm font-medium text-white transition-colors">
-            Approve
-          </button>
-          <button onclick="act('/admin/api/topic-suggestions/{{ s.id }}/discard', 'card-topics-{{ s.id }}', 'topics')"
-                  class="px-4 py-1.5 rounded-lg bg-red-800 hover:bg-red-700 text-sm font-medium text-white transition-colors">
-            Discard
-          </button>
+        <div class="px-5 py-3 bg-gray-900/50 flex items-center gap-5 flex-wrap">
+          <span class="text-xs text-gray-500 uppercase tracking-wide font-medium">Decision:</span>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ s.id }}" value="accept" onchange="onDecisionChange()" class="accent-emerald-500">
+            <span class="text-sm text-emerald-400">Accept</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ s.id }}" value="deny" onchange="onDecisionChange()" class="accent-red-500">
+            <span class="text-sm text-red-400">Deny</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ s.id }}" value="ignore" checked onchange="onDecisionChange()" class="accent-gray-500">
+            <span class="text-sm text-gray-500">Ignore for now</span>
+          </label>
         </div>
       </div>
       {% endfor %}
     {% else %}
-      {{ empty_state('topics', 'topic suggestions') }}
+      {{ empty_state('topics', 'topic changes') }}
     {% endif %}
   </div>
 
@@ -321,6 +345,7 @@
       {% set card_id = 'card-ratings-' ~ r.slug ~ '-' ~ r.field | replace(' ', '_') %}
       <div id="{{ card_id }}"
            data-section="ratings"
+           data-type="rating"
            data-slug="{{ r.slug }}"
            data-field="{{ r.field }}"
            class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-sm">
@@ -374,15 +399,20 @@
           </div>
         </div>
 
-        <div class="px-5 py-3 bg-gray-900/50 flex gap-3">
-          <button onclick="actRating('approve', '{{ r.slug }}', {{ r.field | tojson }}, '{{ card_id }}')"
-                  class="px-4 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-sm font-medium text-white transition-colors">
-            Apply to JSON
-          </button>
-          <button onclick="actRating('discard', '{{ r.slug }}', {{ r.field | tojson }}, '{{ card_id }}')"
-                  class="px-4 py-1.5 rounded-lg bg-red-800 hover:bg-red-700 text-sm font-medium text-white transition-colors">
-            Discard
-          </button>
+        <div class="px-5 py-3 bg-gray-900/50 flex items-center gap-5 flex-wrap">
+          <span class="text-xs text-gray-500 uppercase tracking-wide font-medium">Decision:</span>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ card_id }}" value="accept" onchange="onDecisionChange()" class="accent-emerald-500">
+            <span class="text-sm text-emerald-400">Accept</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ card_id }}" value="deny" onchange="onDecisionChange()" class="accent-red-500">
+            <span class="text-sm text-red-400">Deny</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="radio" name="dec-{{ card_id }}" value="ignore" checked onchange="onDecisionChange()" class="accent-gray-500">
+            <span class="text-sm text-gray-500">Ignore for now</span>
+          </label>
         </div>
       </div>
       {% endfor %}
@@ -393,10 +423,19 @@
 
 </main>
 
-<!-- Toast container -->
-<div id="toast-stack" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 items-end pointer-events-none"></div>
+<!-- Sticky submit bar -->
+<div class="fixed bottom-0 left-0 right-0 z-30 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800 px-6 py-3 flex items-center justify-between gap-4">
+  <span id="decision-summary" class="text-sm text-gray-500">No decisions made — all set to ignore</span>
+  <button id="submit-btn" onclick="submitBatch()" disabled
+          class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-semibold text-white transition-colors">
+    Submit Decisions
+  </button>
+</div>
 
-<!-- Empty state macro (inlined as reusable snippet via JS) -->
+<!-- Toast container (raised above submit bar) -->
+<div id="toast-stack" class="fixed bottom-16 right-5 z-50 flex flex-col gap-2 items-end pointer-events-none"></div>
+
+<!-- Empty state template -->
 <template id="tpl-empty">
   <div class="empty-state flex flex-col items-center justify-center py-24 text-gray-600">
     <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mb-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -422,72 +461,158 @@ function switchTab(key) {
 }
 
 // ---------------------------------------------------------------------------
-// Actions
+// Decision radio tracking
 // ---------------------------------------------------------------------------
-async function act(endpoint, cardId, section, extraBody = {}) {
-  const card = document.getElementById(cardId);
-  if (!card) return;
-  setCardLoading(card, true);
+function onDecisionChange() {
+  updateSummary();
+}
 
-  try {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(extraBody),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      showToast(data.error || 'Request failed', 'error');
-      setCardLoading(card, false);
-      return;
-    }
-    removeCard(card, section);
-    showToast('Done', 'success');
-  } catch (e) {
-    showToast('Network error', 'error');
-    setCardLoading(card, false);
+function getRadioName(card) {
+  return card.dataset.type === 'rating' ? 'dec-' + card.id : 'dec-' + card.dataset.id;
+}
+
+function updateSummary() {
+  let accepts = 0, denies = 0;
+  document.querySelectorAll('[data-type]').forEach(card => {
+    const val = document.querySelector(`input[name="${getRadioName(card)}"]:checked`)?.value;
+    if (val === 'accept') accepts++;
+    else if (val === 'deny') denies++;
+  });
+
+  const el  = document.getElementById('decision-summary');
+  const btn = document.getElementById('submit-btn');
+
+  if (accepts === 0 && denies === 0) {
+    el.textContent  = 'No decisions made — all set to ignore';
+    btn.disabled    = true;
+  } else {
+    const parts = [];
+    if (accepts > 0) parts.push(`${accepts} to accept`);
+    if (denies  > 0) parts.push(`${denies} to deny`);
+    el.textContent = parts.join(', ');
+    btn.disabled   = false;
   }
 }
 
-async function actSlug(endpoint, cardId, section, slugInputId) {
-  const slug = document.getElementById(slugInputId)?.value.trim();
-  if (!slug) { showToast('Slug is required', 'error'); return; }
-  await act(endpoint, cardId, section, { slug });
+// ---------------------------------------------------------------------------
+// Batch submission
+// ---------------------------------------------------------------------------
+function collectDecisions() {
+  const decisions = [];
+  document.querySelectorAll('[data-type]').forEach(card => {
+    const type   = card.dataset.type;
+    const action = document.querySelector(`input[name="${getRadioName(card)}"]:checked`)?.value || 'ignore';
+
+    if (type === 'rating') {
+      decisions.push({ type: 'rating', slug: card.dataset.slug, field: card.dataset.field, action });
+    } else {
+      const d = { type, id: parseInt(card.dataset.id), action };
+      if (type === 'lecture' && card.dataset.isEdit === 'false' && action === 'accept') {
+        d.slug = card.querySelector('.slug-input')?.value.trim() || '';
+      }
+      decisions.push(d);
+    }
+  });
+  return decisions;
 }
 
-async function actRating(action, slug, field, cardId) {
-  const endpoint = `/admin/api/rating-votes/${action}`;
-  await act(endpoint, cardId, 'ratings', { slug, field });
+async function submitBatch() {
+  const decisions  = collectDecisions();
+  const actionable = decisions.filter(d => d.action !== 'ignore');
+  if (actionable.length === 0) {
+    showToast('No decisions to submit', 'error');
+    return;
+  }
+
+  // Validate slugs for accepted new lectures
+  for (const d of actionable) {
+    if (d.type === 'lecture' && d.action === 'accept' && !d.slug) {
+      const card = document.querySelector(`[data-id="${d.id}"][data-is-edit="false"]`);
+      if (card) {
+        showToast('Fill in the slug for all accepted new lectures', 'error');
+        card.querySelector('.slug-input')?.focus();
+        return;
+      }
+    }
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled    = true;
+  btn.textContent = 'Submitting…';
+
+  try {
+    const res  = await fetch('/admin/api/batch', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ decisions }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showToast(data.error || 'Batch failed', 'error');
+      return;
+    }
+
+    // Remove cards that were acted on, grouped by section for badge updates
+    const sectionCounts = {};
+    for (const d of actionable) {
+      let card;
+      if (d.type === 'rating') {
+        card = document.querySelector(`[data-type="rating"][data-slug="${d.slug}"][data-field="${d.field}"]`);
+      } else {
+        card = document.querySelector(`[data-type="${d.type}"][data-id="${d.id}"]`);
+      }
+      if (card) {
+        const section = card.dataset.section;
+        sectionCounts[section] = (sectionCounts[section] || 0) + 1;
+        removeCard(card);
+      }
+    }
+
+    // Decrement badges
+    for (const [section, count] of Object.entries(sectionCounts)) {
+      for (let i = 0; i < count; i++) decrementBadge(section);
+    }
+
+    // Check empty states after animations settle
+    setTimeout(() => {
+      for (const section of Object.keys(sectionCounts)) checkEmpty(section);
+    }, 400);
+
+    const accepted = actionable.filter(d => d.action === 'accept').length;
+    const denied   = actionable.filter(d => d.action === 'deny').length;
+    const parts    = [];
+    if (accepted > 0) parts.push(`${accepted} accepted`);
+    if (denied   > 0) parts.push(`${denied} denied`);
+    showToast('Done — ' + parts.join(', '), 'success');
+
+  } catch (e) {
+    showToast('Network error', 'error');
+  }
+
+  btn.disabled    = false;
+  btn.textContent = 'Submit Decisions';
+  updateSummary();
 }
 
 // ---------------------------------------------------------------------------
 // Card removal with fade
 // ---------------------------------------------------------------------------
-function removeCard(card, section) {
+function removeCard(card) {
   card.style.transition = 'opacity 0.25s ease, transform 0.25s ease, max-height 0.35s ease, margin 0.35s ease, padding 0.35s ease';
-  card.style.overflow = 'hidden';
-  card.style.opacity = '0';
-  card.style.transform = 'translateY(-6px)';
+  card.style.overflow   = 'hidden';
+  card.style.opacity    = '0';
+  card.style.transform  = 'translateY(-6px)';
   const h = card.offsetHeight;
-  card.style.maxHeight = h + 'px';
+  card.style.maxHeight  = h + 'px';
   requestAnimationFrame(() => {
-    card.style.maxHeight = '0';
-    card.style.marginTop = '0';
+    card.style.maxHeight    = '0';
+    card.style.marginTop    = '0';
     card.style.marginBottom = '0';
-    card.style.paddingTop = '0';
+    card.style.paddingTop   = '0';
     card.style.paddingBottom = '0';
   });
-  setTimeout(() => {
-    card.remove();
-    decrementBadge(section);
-    checkEmpty(section);
-  }, 380);
-}
-
-function setCardLoading(card, loading) {
-  card.querySelectorAll('button').forEach(b => b.disabled = loading);
-  if (loading) card.style.opacity = '0.6';
-  else card.style.opacity = '';
+  setTimeout(() => card.remove(), 380);
 }
 
 // ---------------------------------------------------------------------------
@@ -508,18 +633,18 @@ function decrementBadge(section) {
 // Empty state
 // ---------------------------------------------------------------------------
 const EMPTY_LABELS = {
-  new: 'No new lecture submissions',
-  edits: 'No pending edit suggestions',
-  learnings: 'No pending learning outcomes',
-  topics: 'No pending topic changes',
-  ratings: 'No pending rating votes',
+  new:      'No new lecture submissions',
+  edits:    'No pending edit suggestions',
+  learnings:'No pending learning outcomes',
+  topics:   'No pending topic changes',
+  ratings:  'No pending rating votes',
 };
 
 function checkEmpty(section) {
   const panel = document.getElementById('panel-' + section);
   if (!panel) return;
-  const cards = panel.querySelectorAll('[data-section="' + section + '"]');
-  if (cards.length === 0 && !panel.querySelector('.empty-state')) {
+  if (panel.querySelectorAll('[data-section="' + section + '"]').length === 0
+      && !panel.querySelector('.empty-state')) {
     const tpl = document.getElementById('tpl-empty').content.cloneNode(true);
     tpl.querySelector('.empty-label').textContent = EMPTY_LABELS[section] || '';
     panel.appendChild(tpl);
@@ -532,24 +657,29 @@ function checkEmpty(section) {
 function showToast(msg, type = 'success') {
   const stack = document.getElementById('toast-stack');
   const toast = document.createElement('div');
-  const color = type === 'error' ? 'border-red-500 bg-red-950/80 text-red-200' : 'border-emerald-500 bg-emerald-950/80 text-emerald-200';
+  const color = type === 'error'
+    ? 'border-red-500 bg-red-950/80 text-red-200'
+    : 'border-emerald-500 bg-emerald-950/80 text-emerald-200';
   toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border
                      shadow-xl backdrop-blur-sm text-sm font-medium max-w-sm
                      transition-all duration-300 ${color}`;
-  toast.textContent = msg;
-  toast.style.opacity = '0';
+  toast.textContent    = msg;
+  toast.style.opacity  = '0';
   toast.style.transform = 'translateY(8px)';
   stack.appendChild(toast);
   requestAnimationFrame(() => {
-    toast.style.opacity = '1';
+    toast.style.opacity   = '1';
     toast.style.transform = 'translateY(0)';
   });
   setTimeout(() => {
-    toast.style.opacity = '0';
+    toast.style.opacity   = '0';
     toast.style.transform = 'translateY(8px)';
     setTimeout(() => toast.remove(), 300);
   }, 4000);
 }
+
+// Initialise summary on page load
+updateSummary();
 </script>
 
 </body>
