@@ -6,5 +6,7 @@
     "urls": [
         "https://www.youtube.com/watch?v=G8wNyqPUYtU"
     ],
-    "embed": true
+    "embed": true,
+    "worthListeningToWithoutVideo": 9,
+    "startsAt": 320
 }
